@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spacefaring Ventures</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500&family=Lato:wght@100;300;400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-primary: #050507;
+    --bg-secondary: #08090e;
+    --bg-card: #0c0e15;
+    --text-primary: #ffffff;
+    --text-secondary: #c8d0e0;
+    --text-muted: #6b7a94;
+    --accent: #ffffff;
+    --accent-blue: #4a7dff;
+    --accent-glow: rgba(74, 125, 255, 0.15);
+    --accent-cyan: #38bdf8;
+    --accent-violet: #a78bfa;
+    --accent-emerald: #34d399;
+    --border: rgba(255,255,255,0.05);
+    --font-display: 'Outfit', sans-serif;
+    --font-body: 'Lato', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 1.5rem 4rem;
+    display: flex; justify-content: space-between; align-items: center;
+    background: rgba(5,5,7,0.88);
+    backdrop-filter: blur(24px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-logo {
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: 1.1rem;
+    letter-spacing: 0.22em;
+    color: var(--text-primary);
+    text-decoration: none;
+    text-transform: uppercase;
+  }
+  .nav-logo span { color: var(--accent); }
+  .nav-links { display: flex; gap: 2.5rem; }
+  .nav-links a {
+    font-family: var(--font-display);
+    font-size: 0.82rem;
+    font-weight: 300;
+    letter-spacing: 0.14em;
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: color 0.3s;
+  }
+  .nav-links a:hover { color: var(--text-primary); }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 8rem 2rem 4rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: radial-gradient(ellipse at 50% 30%, rgba(74,125,255,0.06) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .hero-eyebrow {
+    font-family: var(--font-display);
+    font-size: 0.78rem;
+    font-weight: 300;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 2rem;
+    position: relative;
+  }
+  .hero h1 {
+    font-family: var(--font-display);
+    font-size: clamp(2.8rem, 6vw, 5rem);
+    font-weight: 200;
+    line-height: 1.15;
+    max-width: 900px;
+    letter-spacing: 0.03em;
+    position: relative;
+  }
+  .hero h1 strong {
+    font-weight: 400;
+    background: linear-gradient(135deg, #ffffff 0%, #6b9aff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero-sub {
+    font-family: var(--font-body);
+    font-size: 1.15rem;
+    font-weight: 300;
+    color: var(--text-secondary);
+    max-width: 600px;
+    margin-top: 2rem;
+    position: relative;
+    letter-spacing: 0.01em;
+  }
+
+  /* MISSION */
+  .mission {
+    padding: 6rem 4rem;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-secondary);
+    text-align: center;
+  }
+  .mission-inner {
+    max-width: 850px;
+    margin: 0 auto;
+  }
+  .mission-label {
+    font-family: var(--font-display);
+    font-size: 0.75rem;
+    font-weight: 300;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 2.5rem;
+  }
+  .mission-statement {
+    font-family: var(--font-body);
+    font-size: clamp(1.3rem, 2.5vw, 1.7rem);
+    font-weight: 300;
+    line-height: 1.7;
+    color: var(--text-primary);
+    letter-spacing: 0.01em;
+  }
+  .mission-note {
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    font-weight: 300;
+    color: var(--text-secondary);
+    margin-top: 2.5rem;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.8;
+  }
+
+  /* SECTIONS */
+  section {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 7rem 4rem;
+  }
+  .section-label {
+    font-family: var(--font-display);
+    font-size: 0.75rem;
+    font-weight: 300;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1.5rem;
+  }
+  .section-title {
+    font-family: var(--font-display);
+    font-size: clamp(1.8rem, 3vw, 2.6rem);
+    font-weight: 200;
+    line-height: 1.3;
+    max-width: 700px;
+    margin-bottom: 2rem;
+    letter-spacing: 0.02em;
+  }
+  .section-text {
+    font-family: var(--font-body);
+    font-size: 1.05rem;
+    font-weight: 300;
+    color: var(--text-secondary);
+    max-width: 650px;
+    line-height: 1.8;
+  }
+
+  /* THESIS */
+  .thesis { border-bottom: 1px solid var(--border); }
+  .thesis-pillars {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    margin-top: 3.5rem;
+  }
+  .pillar {
+    padding: 2rem;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--bg-card);
+    transition: border-color 0.3s;
+  }
+  .pillar:hover { border-color: rgba(74,125,255,0.25); }
+  .pillar-icon { display: none; }
+  .pillar h4 {
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+    font-weight: 300;
+    margin-bottom: 0.75rem;
+    letter-spacing: 0.02em;
+  }
+  .pillar p {
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.7;
+    font-weight: 300;
+  }
+
+  /* PORTFOLIO */
+  .portfolio {
+    padding: 7rem 4rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .portfolio-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+    margin-top: 3.5rem;
+    max-width: 1100px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .portfolio-card {
+    padding: 2.5rem;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--bg-card);
+    transition: border-color 0.3s, transform 0.3s;
+  }
+  .portfolio-card:hover {
+    border-color: rgba(74,125,255,0.2);
+    transform: translateY(-2px);
+  }
+  .portfolio-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1.25rem;
+  }
+  .portfolio-card h4 {
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+    font-weight: 300;
+    letter-spacing: 0.02em;
+  }
+  .portfolio-tag {
+    font-family: var(--font-display);
+    font-size: 0.7rem;
+    font-weight: 300;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent-blue);
+    background: var(--accent-glow);
+    padding: 0.3rem 0.75rem;
+    border-radius: 20px;
+    white-space: nowrap;
+  }
+  .portfolio-card p {
+    font-family: var(--font-body);
+    font-size: 0.92rem;
+    color: var(--text-secondary);
+    line-height: 1.75;
+    font-weight: 300;
+  }
+  .portfolio-card .portfolio-meta {
+    margin-top: 1.25rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border);
+    font-family: var(--font-body);
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-weight: 300;
+    letter-spacing: 0.03em;
+  }
+
+  /* METRICS BAR */
+  .metrics {
+    padding: 4rem 4rem;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-secondary);
+  }
+  .metrics-grid {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem;
+    text-align: center;
+  }
+  .metric-item h3 {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 3.5vw, 3rem);
+    font-weight: 200;
+    color: var(--text-primary);
+    letter-spacing: 0.01em;
+  }
+  .metric-item p {
+    font-family: var(--font-display);
+    font-size: 0.82rem;
+    font-weight: 300;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-top: 0.5rem;
+  }
+
+  /* CONVICTION / STORY */
+  .conviction {
+    background: var(--bg-secondary);
+    padding: 7rem 4rem;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .conviction-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  .timeline {
+    margin-top: 3.5rem;
+    position: relative;
+    padding-left: 3rem;
+  }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: linear-gradient(to bottom, var(--accent-blue), var(--border));
+  }
+  .timeline-item {
+    margin-bottom: 3rem;
+    position: relative;
+  }
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -3rem;
+    top: 0.5rem;
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--accent-blue);
+    box-shadow: 0 0 10px rgba(74,125,255,0.4);
+  }
+  .timeline-year {
+    font-family: var(--font-display);
+    font-size: 0.8rem;
+    font-weight: 300;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    margin-bottom: 0.5rem;
+  }
+  .timeline-item h4 {
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    font-weight: 300;
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.02em;
+  }
+  .timeline-item p {
+    font-family: var(--font-body);
+    font-size: 0.92rem;
+    color: var(--text-secondary);
+    font-weight: 300;
+    line-height: 1.7;
+    max-width: 600px;
+  }
+
+  /* FOUNDER */
+  .founder {
+    padding: 7rem 4rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .founder-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1.4fr;
+    gap: 4rem;
+    align-items: start;
+  }
+  .founder-image {
+    aspect-ratio: 3/4;
+    background: var(--bg-card);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .founder-image-placeholder {
+    font-family: var(--font-display);
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .founder-content .section-text { max-width: none; }
+  .founder-content .section-text + .section-text { margin-top: 1.25rem; }
+  .founder-credentials {
+    margin-top: 2rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+  .credential-tag {
+    font-family: var(--font-display);
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    font-weight: 300;
+    color: var(--text-secondary);
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    padding: 0.4rem 1rem;
+    border-radius: 20px;
+  }
+
+  /* CONTACT */
+  .contact {
+    padding: 7rem 4rem;
+    text-align: center;
+  }
+  .contact-inner {
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  .contact a {
+    color: var(--accent-blue);
+    text-decoration: none;
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    font-weight: 300;
+    letter-spacing: 0.05em;
+    transition: color 0.3s;
+  }
+  .contact a:hover { color: #6b9aff; }
+  .contact-note {
+    margin-top: 1rem;
+    font-family: var(--font-body);
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    font-weight: 300;
+  }
+
+  /* FOOTER */
+  footer {
+    padding: 2.5rem 4rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  footer p {
+    font-family: var(--font-body);
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    letter-spacing: 0.03em;
+    font-weight: 300;
+  }
+  .footer-badge {
+    font-family: var(--font-display);
+    font-size: 0.7rem;
+    font-weight: 300;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+    padding: 0.4rem 0.8rem;
+    border-radius: 4px;
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 900px) {
+    nav { padding: 1.25rem 2rem; }
+    section, .portfolio, .conviction, .contact, .founder { padding: 4rem 2rem; }
+    .metrics { padding: 3rem 2rem; }
+    .metrics-grid { grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
+    .thesis-pillars { grid-template-columns: 1fr; }
+    .portfolio-grid { grid-template-columns: 1fr; }
+    .founder-inner { grid-template-columns: 1fr; }
+    .founder-image { max-width: 320px; }
+    .mission { padding: 4rem 2rem; }
+    footer { flex-direction: column; gap: 1rem; text-align: center; }
+  }
+  @media (max-width: 600px) {
+    nav { padding: 1rem 1.25rem; }
+    .nav-links { gap: 1.5rem; }
+    .nav-links a { font-size: 0.78rem; }
+    .hero { padding: 7rem 1.5rem 3rem; }
+    section, .portfolio, .conviction, .contact, .founder { padding: 3rem 1.5rem; }
+    .metrics-grid { grid-template-columns: 1fr 1fr; }
+    .mission { padding: 3rem 1.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAVIGATION -->
+<nav>
+  <a href="#" class="nav-logo"><span>S</span>pacefaring Ventures</a>
+  <div class="nav-links">
+    <a href="#mission">Mission</a>
+    <a href="#thesis">Thesis</a>
+    <a href="#portfolio">Portfolio</a>
+    <a href="#story">Story</a>
+    <a href="#founder">Founder</a>
+    <a href="#contact">Contact</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+
+  <h1>Accelerating the advent of an <strong>exciting future</strong></h1>
+  <p class="hero-sub">We invest in the companies building the technologies that will define the next century - from space exploration to artificial intelligence.</p>
+</section>
+
+<!-- MISSION -->
+<div class="mission" id="mission">
+  <div class="mission-inner">
+    <p class="mission-label">Our Mission</p>
+    <p class="mission-statement">Solve humanity\'s most important problems and accelerate the advent of an exciting future by investing in the world\'s best technology companies.</p>
+    <p class="mission-note">The name "Spacefaring" reflects our deepest conviction - that humanity\'s future lies beyond the boundaries of what we know today. Just as the great explorers expanded the frontiers of the known world, we back the companies expanding the frontiers of what is possible - in space, in intelligence, and in the technologies that will carry civilization forward.</p>
+  </div>
+</div>
+
+<!-- THESIS -->
+<section class="thesis" id="thesis">
+  <p class="section-label">Investment Thesis</p>
+  <h2 class="section-title">First-principles conviction in converging technology waves</h2>
+  <p class="section-text">We identify generational companies at the intersection of autonomy, artificial intelligence, robotics, energy, and space - then back them with deep conviction and a long time horizon.</p>
+  <div class="thesis-pillars">
+    <div class="pillar">
+      <div class="pillar-icon cyan">&#9672;</div>
+      <h4>Frontier Technology</h4>
+      <p>We invest in companies building at the edge of what is possible - technologies that expand the boundaries of human capability and reshape entire industries.</p>
+    </div>
+    <div class="pillar">
+      <div class="pillar-icon violet">&#9670;</div>
+      <h4>Contrarian Conviction</h4>
+      <p>Our best investments have been contrarian bets backed by rigorous first-principles analysis, held through volatility and skepticism until the thesis plays out.</p>
+    </div>
+    <div class="pillar">
+      <div class="pillar-icon emerald">&#9671;</div>
+      <h4>Decades, Not Quarters</h4>
+      <p>We think in decades, not quarters. The most consequential companies require patient capital and the willingness to endure short-term noise for long-term compounding.</p>
+    </div>
+  </div>
+</section>
+
+<!-- PORTFOLIO -->
+<section class="portfolio" id="portfolio">
+  <div style="max-width:1100px; margin:0 auto;">
+    <p class="section-label">Portfolio</p>
+    <h2 class="section-title">Backing the companies shaping the future</h2>
+    <p class="section-text">Our portfolio is concentrated in a small number of high-conviction positions in companies we believe will be among the most consequential of the 21st century.</p>
+  </div>
+  <div class="portfolio-grid">
+    <div class="portfolio-card">
+      <div class="portfolio-card-header">
+        <h4>SpaceX</h4>
+        <span class="portfolio-tag">Space &middot; Infrastructure</span>
+      </div>
+      <p>The world\'s most valuable private company and the undisputed leader in orbital launch. SpaceX has fundamentally rewritten the economics of space access, achieving over 300 successful missions and pioneering reusable rocketry that reduced launch costs by orders of magnitude. Starlink is building the world\'s largest satellite constellation, delivering broadband connectivity to over 100 countries. Starship - the most powerful rocket ever built - represents the next leap: a fully reusable super heavy-lift vehicle designed for interplanetary transport, point-to-point Earth travel, and establishing a permanent human presence on Mars.</p>
+      <div class="portfolio-meta">Invested since 2021 &middot; 2021 vintage, 5 years held</div>
+    </div>
+    <div class="portfolio-card">
+      <div class="portfolio-card-header">
+        <h4>xAI</h4>
+        <span class="portfolio-tag">Artificial Intelligence</span>
+      </div>
+      <p>Founded with the mission to understand the true nature of the universe, xAI is building frontier AI systems that accelerate scientific discovery. The company has assembled one of the world\'s most talented AI research teams and built Colossus - one of the largest GPU training clusters ever constructed - giving it the infrastructure to train models at unprecedented scale. xAI\'s Grok models are already pushing the boundaries of reasoning, coding, and multimodal understanding, positioning the company at the vanguard of the intelligence revolution.</p>
+      <div class="portfolio-meta">Invested since 2025 &middot; Multiple fund vehicles</div>
+    </div>
+  </div>
+</section>
+
+<!-- METRICS -->
+<div class="metrics">
+  <div class="metrics-grid">
+    <div class="metric-item">
+      <h3>11</h3>
+      <p>Fund Vehicles</p>
+    </div>
+    <div class="metric-item">
+      <h3>40+</h3>
+      <p>Investors Worldwide</p>
+    </div>
+    <div class="metric-item">
+      <h3>9 Figures</h3>
+      <p>Assets Under Management</p>
+    </div>
+    <div class="metric-item">
+      <h3>2020</h3>
+      <p>Founded</p>
+    </div>
+  </div>
+</div>
+
+<!-- CONVICTION / STORY -->
+<div class="conviction" id="story">
+  <div class="conviction-inner">
+    <p class="section-label">Our Story</p>
+    <h2 class="section-title">A decade of conviction investing</h2>
+    <p class="section-text">Spacefaring Ventures was born from a simple but powerful insight - that the most important technologies of our time were being systematically undervalued by mainstream investors.</p>
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="timeline-year">2013</div>
+        <h4>The Tesla bet</h4>
+        <p>An early, high-conviction position in Tesla - years before the company\'s thesis was widely accepted. Held through significant volatility and widespread skepticism, this contrarian bet became the foundation for everything that followed.</p>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-year">2020</div>
+        <h4>Spacefaring Ventures founded</h4>
+        <p>Built from the ground up as a solo GP - raising capital, making all investment decisions, managing LP relationships, and directing strategy independently. No institutional backing, no family wealth, no conventional VC credentials. Just conviction.</p>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-year">2021</div>
+        <h4>SpaceX - first funds deployed</h4>
+        <p>Launched the first fund vehicles to provide investors access to SpaceX equity on the secondary market. The first 3 to 5 funds, all 2021 vintage, have now been held for five years - a testament to patient, long-term conviction. The thesis: SpaceX was the single most important infrastructure company being built, and most investors were structurally locked out.</p>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-year">2025</div>
+        <h4>xAI - expanding the frontier</h4>
+        <p>Expanded into frontier AI with investments in xAI, recognizing the convergence between space infrastructure and artificial intelligence as the defining technology axis of the coming decades.</p>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-year">2026</div>
+        <h4>SEC Registered Adviser</h4>
+        <p>Became a registered SEC Exempt Reporting Adviser, reflecting the firm\'s growth and commitment to institutional-grade compliance as it scales across 11 fund vehicles and over 40 investors worldwide.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FOUNDER -->
+<section class="founder" id="founder">
+  <div class="founder-inner">
+    <div class="founder-image">
+      <img src="https://lh3.googleusercontent.com/d/1R7h8RdNbYquU4_y1RfQ2e8G5r-BdqpT0=w500" alt="Anish Philip - Founder of Spacefaring Ventures" style="width:100%;height:100%;object-fit:cover;">
+    </div>
+    <div class="founder-content">
+      <p class="section-label">Founder</p>
+      <h2 class="section-title">Anish Philip</h2>
+      <p class="section-text">Founder, CEO, and sole General Partner of Spacefaring Ventures. Anish built the firm from the ground up as a solo GP - raising capital, making every investment decision, managing LP relationships, and directing strategy entirely alone.</p>
+      <p class="section-text">His investing journey began in 2013 with an early, high-conviction position in Tesla - years before the company\'s thesis was widely accepted. That contrarian bet, held through significant volatility and widespread skepticism, became the foundation for his broader approach: first-principles analysis of converging technology waves across autonomy, AI, robotics, energy, and space.</p>
+      <p class="section-text">Anish combines nearly two decades of software engineering experience at world-class technology companies with deep technical fluency that informs every investment decision. A first-generation immigrant, he built his career, his fund, and his track record independently - without family wealth, institutional networks, or conventional credentials in finance or venture capital.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section class="contact" id="contact">
+  <div class="contact-inner">
+    <p class="section-label">Get In Touch</p>
+    <h2 class="section-title" style="margin: 0 auto 1.5rem;">Let\'s talk about the future</h2>
+    <p class="section-text" style="max-width: none; margin-bottom: 2rem;">For inquiries about our funds, partnership opportunities, or to learn more about our investment thesis.</p>
+    <a href="mailto:ir@spacefaring.ventures">ir@spacefaring.ventures</a>
+    <p class="contact-note">Spacefaring Ventures LLC is a registered SEC Exempt Reporting Adviser (CRD# 342085)</p>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p>&copy; 2026 Spacefaring Ventures LLC. All rights reserved.</p>
+  <span class="footer-badge">San Francisco Bay Area</span>
+</footer>
+
+</body>
+</html>
