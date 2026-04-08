@@ -731,9 +731,14 @@
   function update(){
     var scrollY = window.scrollY + 120;
     var active = null;
-    sections.forEach(function(s){
-      if(s.el.offsetTop <= scrollY) active = s;
-    });
+    var atBottom = (window.innerHeight + window.scrollY) >= (document.body.scrollHeight - 50);
+    if(atBottom && sections.length > 0){
+      active = sections[sections.length - 1];
+    } else {
+      sections.forEach(function(s){
+        if(s.el.offsetTop <= scrollY) active = s;
+      });
+    }
     links.forEach(function(a){ a.classList.remove("active"); });
     if(active) active.link.classList.add("active");
   }
