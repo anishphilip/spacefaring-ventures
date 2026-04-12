@@ -4,6 +4,17 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Spacefaring Ventures</title>
+<meta name="description" content="Spacefaring Ventures invests in generational companies building technologies that will define the next millennium - from space exploration to artificial intelligence.">
+<meta property="og:title" content="Spacefaring Ventures">
+<meta property="og:description" content="We invest in generational companies building technologies that will define the next millennium - from space exploration to artificial intelligence.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://www.spacefaring.ventures/">
+<meta property="og:image" content="https://www.spacefaring.ventures/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Spacefaring Ventures">
+<meta name="twitter:description" content="We invest in generational companies building technologies that will define the next millennium - from space exploration to artificial intelligence.">
+<meta name="twitter:image" content="https://www.spacefaring.ventures/og-image.png">
+<link rel="icon" type="image/png" href="/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500&family=Lato:wght@100;300;400&display=swap" rel="stylesheet">
@@ -500,29 +511,6 @@
     border-radius: 4px;
   }
 
-  /* RESPONSIVE */
-  @media (max-width: 900px) {
-    nav { padding: 1.25rem 2rem; }
-    section, .portfolio, .conviction, .contact, .founder { padding: 4rem 2rem; }
-    .metrics { padding: 3rem 2rem; }
-    .metrics-grid { grid-template-columns: repeat(2, 1fr); gap: 0.8rem; }
-    .thesis-pillars { grid-template-columns: 1fr; }
-    .portfolio-grid { grid-template-columns: 1fr; }
-    .founder-inner { grid-template-columns: 1fr; }
-    .founder-image { max-width: 320px; }
-    .mission { padding: 4rem 2rem; }
-    footer { flex-direction: column; gap: 1rem; text-align: center; }
-  }
-  @media (max-width: 600px) {
-    nav { padding: 0.8rem 1rem; flex-direction: column; gap: 0.5rem; text-align: center; }
-    .nav-links { gap: 0.6rem; flex-wrap: wrap; justify-content: center; }
-    .nav-links a { font-size: 0.65rem; letter-spacing: 0.06em; }
-    .hero { padding: 7rem 1.5rem 3rem; }
-    section, .portfolio, .conviction, .contact, .founder { padding: 3rem 1.5rem; }
-    .metrics-grid { grid-template-columns: 1fr 1fr; }
-    .mission { padding: 3rem 1.5rem; }
-  }
-
   /* DISCLAIMER */
   .disclaimer {
     padding: 3rem 4rem 1rem;
@@ -540,6 +528,74 @@
     letter-spacing: 0.01em;
   }
 
+  /* SCROLL ANIMATIONS */
+  .fade-in {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .fade-in.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .timeline-item { transition-delay: calc(var(--i, 0) * 0.12s); }
+
+  /* RESPONSIVE */
+  @media (max-width: 900px) {
+    nav { padding: 1.25rem 2rem; }
+    section, .portfolio, .conviction, .contact, .founder { padding: 4rem 2rem; }
+    .metrics { padding: 3rem 2rem; }
+    .metrics-grid { grid-template-columns: repeat(2, 1fr); gap: 0.8rem; }
+    .thesis-pillars { grid-template-columns: 1fr; }
+    .portfolio-grid { grid-template-columns: 1fr; }
+    .founder-inner { grid-template-columns: 1fr; }
+    .founder-image { max-width: 320px; }
+    .mission { padding: 4rem 2rem; }
+    footer { flex-direction: column; gap: 1rem; text-align: center; }
+  }
+  /* HAMBURGER MENU */
+  .hamburger {
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    z-index: 101;
+  }
+  .hamburger span {
+    display: block;
+    width: 22px;
+    height: 1.5px;
+    background: var(--text-primary);
+    margin: 5px 0;
+    transition: transform 0.3s, opacity 0.3s;
+  }
+  .hamburger.active span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
+  .hamburger.active span:nth-child(2) { opacity: 0; }
+  .hamburger.active span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
+
+  @media (max-width: 600px) {
+    .hamburger { display: block; }
+    nav { padding: 1rem 1.5rem; }
+    .nav-links {
+      display: none;
+      flex-direction: column;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(5,5,7,0.96);
+      backdrop-filter: blur(24px);
+      justify-content: center;
+      align-items: center;
+      gap: 2.5rem;
+      z-index: 100;
+    }
+    .nav-links.open { display: flex; }
+    .nav-links a { font-size: 1rem; letter-spacing: 0.14em; }
+    .hero { padding: 7rem 1.5rem 3rem; }
+    section, .portfolio, .conviction, .contact, .founder { padding: 3rem 1.5rem; }
+    .metrics-grid { grid-template-columns: 1fr 1fr; }
+    .mission { padding: 3rem 1.5rem; }
+  }
 </style>
 </head>
 <body>
@@ -547,6 +603,7 @@
 <!-- NAVIGATION -->
 <nav>
   <a href="#" class="nav-logo"><span>S</span>pacefaring Ventures</a>
+  <button class="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
   <div class="nav-links">
     <a href="#mission">Mission</a>
     <a href="#thesis">Thesis</a>
@@ -561,7 +618,7 @@
 <section class="hero">
 
   <h1>Accelerating the advent of an <strong>exciting future</strong></h1>
-  <p class="hero-sub">We invest in companies building technologies that will define the next century - from space exploration to artificial intelligence.</p>
+  <p class="hero-sub">We invest in companies building technologies that will define the next millennium - just a hundred decades away - from space exploration to artificial intelligence.</p>
 </section>
 
 <!-- MISSION -->
@@ -569,7 +626,7 @@
   <div class="mission-inner">
     <p class="mission-label">Our Mission</p>
     <p class="mission-statement">Solve humanity's most important problems and accelerate the advent of an exciting future by investing in the world's best technology companies.</p>
-    <p class="mission-note">The name &quot;Spacefaring&quot; reflects our deepest conviction - that humanity's future lies beyond the boundaries of what we know today. Just as the great explorers expanded the frontiers of the known world, we back the companies expanding the frontiers of what is possible - in space, in intelligence, and in technologies that will carry civilization forward.</p>
+    <p class="mission-note">The name &quot;Spacefaring&quot; reflects our deepest conviction: that humanity's future lies beyond the boundaries of what is known today. For us, spacefaring is not merely about traveling beyond Earth, but about pursuing ventures as vast, open-ended, and limitless as space itself. It represents pure ambition - the drive to push past every boundary, expand the frontiers of what is possible, and back the companies building the technologies that will carry civilization forward. Just as the great explorers once expanded the known world, we back generational companies expanding the horizons of humanity in space, intelligence, autonomy, humanoid robotics, energy, and other foundational technologies of the future.</p>
   </div>
 </div>
 
@@ -609,14 +666,14 @@
       <div class="portfolio-card-header">
         <h4>SpaceX</h4>
       </div>
-      <p>The world's most valuable private company and the undisputed leader in orbital launch. SpaceX has fundamentally rewritten the economics of space access, achieving over 300 successful missions and pioneering reusable rocketry that reduced launch costs by orders of magnitude. Starlink is building the world's largest satellite constellation, delivering broadband connectivity to over 100 countries. Starship - the most powerful rocket ever built - represents the next leap: a fully reusable super heavy-lift vehicle designed for interplanetary transport, point-to-point Earth travel, and establishing a permanent human presence on Mars.</p>
+      <p>The world's most valuable private company and the undisputed leader in orbital launch. SpaceX has rewritten the economics of space access through reusable rocketry, built the world's largest satellite constellation with Starlink, and is now developing Starship - a fully reusable super heavy-lift vehicle designed for interplanetary transport and establishing a permanent human presence on Mars.</p>
       <div class="portfolio-meta">Invested since 2021 &middot; Multiple Fund vehicles</div>
     </div>
     <div class="portfolio-card">
       <div class="portfolio-card-header">
         <h4>xAI</h4>
       </div>
-      <p>Founded with the mission to understand the true nature of the universe, xAI is building frontier AI systems that accelerate scientific discovery. The company has assembled one of the world's most talented AI research teams and built Colossus - one of the largest GPU training clusters ever constructed - giving it the infrastructure to train models at unprecedented scale. xAI's Grok models are already pushing the boundaries of reasoning, coding, and multimodal understanding, positioning the company at the vanguard of the intelligence revolution.</p>
+      <p>Founded with the mission to understand the true nature of the universe, xAI is building frontier AI systems that accelerate scientific discovery. With Colossus - one of the largest GPU training clusters ever constructed - and Grok models pushing the boundaries of reasoning and multimodal understanding, xAI stands at the vanguard of the intelligence revolution.</p>
       <div class="portfolio-meta">Invested since 2025 &middot; Multiple fund vehicles</div>
     </div>
   </div>
@@ -627,7 +684,7 @@
   <div class="metrics-grid">
     <div class="metric-item">
       <h3>11</h3>
-      <p>Fund Vehicles</p>
+      <p>Funds</p>
     </div>
     <div class="metric-item">
       <h3>40+</h3>
@@ -721,6 +778,7 @@
 
 <script>
 (function(){
+  /* NAV ACTIVE STATE */
   var links = document.querySelectorAll(".nav-links a");
   var sections = [];
   links.forEach(function(a){
@@ -744,7 +802,74 @@
   }
   window.addEventListener("scroll", update, {passive:true});
   update();
+
+  /* HAMBURGER MENU */
+  var hamburger = document.querySelector(".hamburger");
+  var navLinks = document.querySelector(".nav-links");
+  if(hamburger){
+    hamburger.addEventListener("click", function(){
+      hamburger.classList.toggle("active");
+      navLinks.classList.toggle("open");
+    });
+    navLinks.querySelectorAll("a").forEach(function(a){
+      a.addEventListener("click", function(){
+        hamburger.classList.remove("active");
+        navLinks.classList.remove("open");
+      });
+    });
+  }
+
+  /* SCROLL FADE-IN */
+  var fadeEls = document.querySelectorAll(".mission-inner, .thesis .section-label, .thesis .section-title, .thesis .section-text, .pillar, .portfolio .section-label, .portfolio .section-title, .portfolio .section-text, .portfolio-card, .metric-item, .timeline-item, .founder-image, .founder-content, .contact-inner");
+  fadeEls.forEach(function(el, i){
+    el.classList.add("fade-in");
+    if(el.classList.contains("timeline-item")) el.style.setProperty("--i", i);
+  });
+  var fadeObserver = new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      if(entry.isIntersecting){
+        entry.target.classList.add("visible");
+        fadeObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.15 });
+  fadeEls.forEach(function(el){ fadeObserver.observe(el); });
+
+  /* COUNTER ANIMATION */
+  var metricH3s = document.querySelectorAll(".metric-item h3");
+  var counterDone = false;
+  var counterObserver = new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      if(entry.isIntersecting && !counterDone){
+        counterDone = true;
+        metricH3s.forEach(function(h3){
+          var text = h3.textContent.trim();
+          var match = text.match(/^(\d+)(\+?)$/);
+          if(match){
+            var target = parseInt(match[1]);
+            var suffix = match[2];
+            var start = 0;
+            var duration = 1200;
+            var startTime = null;
+            function animate(ts){
+              if(!startTime) startTime = ts;
+              var progress = Math.min((ts - startTime) / duration, 1);
+              var eased = 1 - Math.pow(1 - progress, 3);
+              h3.textContent = Math.floor(eased * target) + suffix;
+              if(progress < 1) requestAnimationFrame(animate);
+            }
+            h3.textContent = "0" + suffix;
+            requestAnimationFrame(animate);
+          }
+        });
+        counterObserver.disconnect();
+      }
+    });
+  }, { threshold: 0.3 });
+  var metricsSection = document.querySelector(".metrics");
+  if(metricsSection) counterObserver.observe(metricsSection);
 })();
 </script>
+
 </body>
 </html>
