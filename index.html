@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -821,9 +822,10 @@
 
   /* SCROLL FADE-IN */
   var fadeEls = document.querySelectorAll(".mission-inner, .thesis .section-label, .thesis .section-title, .thesis .section-text, .pillar, .portfolio .section-label, .portfolio .section-title, .portfolio .section-text, .portfolio-card, .metric-item, .timeline-item, .founder-image, .founder-content, .contact-inner");
-  fadeEls.forEach(function(el, i){
+  var timelineIdx = 0;
+  fadeEls.forEach(function(el){
     el.classList.add("fade-in");
-    if(el.classList.contains("timeline-item")) el.style.setProperty("--i", i);
+    if(el.classList.contains("timeline-item")){ el.style.setProperty("--i", timelineIdx); timelineIdx++; }
   });
   var fadeObserver = new IntersectionObserver(function(entries){
     entries.forEach(function(entry){
