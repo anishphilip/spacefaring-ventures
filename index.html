@@ -138,6 +138,34 @@
     position: relative;
     letter-spacing: 0.01em;
   }
+  .hero-proof {
+    display: flex;
+    gap: 2.5rem;
+    margin-top: 2.5rem;
+    position: relative;
+  }
+  .hero-proof span {
+    font-family: var(--font-display);
+    font-size: 0.8rem;
+    font-weight: 300;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .hero-proof span strong {
+    display: block;
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+    font-weight: 200;
+    letter-spacing: 0.02em;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+    text-transform: none;
+  }
+  @media (max-width: 600px) {
+    .hero-proof { gap: 1.5rem; flex-wrap: wrap; justify-content: center; }
+    .hero-proof span strong { font-size: 1.3rem; }
+  }
 
   /* MISSION */
   .mission {
@@ -475,6 +503,17 @@
   }
   .founder-content .section-text { max-width: none; }
   .founder-content .section-text + .section-text { margin-top: 1.25rem; }
+  .founder-micro {
+    font-family: var(--font-display);
+    font-size: 0.72rem;
+    font-weight: 300;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent-blue);
+    margin-bottom: 0.5rem;
+    margin-top: 2rem;
+  }
+  .founder-micro:first-of-type { margin-top: 0; }
   .founder-credentials {
     margin-top: 2rem;
     display: flex;
@@ -512,8 +551,45 @@
     transition: color 0.3s;
   }
   .contact a:hover { color: #6b9aff; }
+  .contact-paths {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin: 2.5rem auto 0;
+    max-width: 700px;
+    text-align: left;
+  }
+  .contact-path {
+    padding: 2rem;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--bg-card);
+    transition: border-color 0.3s;
+  }
+  .contact-path:hover { border-color: rgba(74,125,255,0.25); }
+  .contact-path h4 {
+    font-family: var(--font-display);
+    font-size: 0.95rem;
+    font-weight: 300;
+    letter-spacing: 0.02em;
+    margin-bottom: 0.75rem;
+  }
+  .contact-path p {
+    font-family: var(--font-body);
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    font-weight: 300;
+    line-height: 1.7;
+    margin-bottom: 1.25rem;
+  }
+  .contact-path a {
+    font-size: 0.9rem;
+  }
+  @media (max-width: 600px) {
+    .contact-paths { grid-template-columns: 1fr; gap: 1.25rem; }
+  }
   .contact-note {
-    margin-top: 1rem;
+    margin-top: 2rem;
     font-family: var(--font-body);
     font-size: 0.85rem;
     color: var(--text-muted);
@@ -658,7 +734,13 @@
 <section class="hero">
 
   <h1>Accelerating the advent of an <strong>exciting future</strong></h1>
-  <p class="hero-sub">We invest in companies building technologies that will define the next millennium - just a hundred decades away - from space exploration to artificial intelligence.</p>
+  <p class="hero-sub">Investing in generational companies building the technologies that will define the next millennium - from space exploration to artificial intelligence.</p>
+  <div class="hero-proof">
+    <span><strong>11</strong>Funds</span>
+    <span><strong>40+</strong>Investors</span>
+    <span><strong>9 Figures</strong>AUM</span>
+    <span><strong>2020</strong>Founded</span>
+  </div>
 </section>
 
 <!-- MISSION -->
@@ -666,7 +748,8 @@
   <div class="mission-inner">
     <p class="mission-label">Our Mission</p>
     <p class="mission-statement">Solve humanity's most important problems and accelerate the advent of an exciting future by investing in the world's best technology companies.</p>
-    <p class="mission-note">The name &quot;Spacefaring&quot; reflects our deepest conviction: that humanity's future lies beyond the boundaries of what is known today. For us, spacefaring is not merely about traveling beyond Earth, but about pursuing ventures as vast, open-ended, and limitless as space itself. It represents pure ambition - the drive to push past every boundary, expand the frontiers of what is possible, and back the companies building the technologies that will carry civilization forward. Just as the great explorers once expanded the known world, we back generational companies expanding the horizons of humanity in space, intelligence, autonomy, humanoid robotics, energy, and other foundational technologies of the future.</p>
+    <p class="mission-note">The name "Spacefaring" reflects our deepest conviction: that humanity's future lies beyond the boundaries of what is known today. For us, spacefaring is not merely about traveling beyond Earth, but about pursuing ventures as vast, open-ended, and limitless as space itself.</p>
+    <p class="mission-note">It represents the drive to push past every boundary, expand the frontiers of what is possible, and back the companies building the technologies that will carry civilization forward - in space, intelligence, autonomy, robotics, energy, and other foundational technologies of the future.</p>
   </div>
 </div>
 
@@ -699,7 +782,7 @@
   <div style="max-width:1100px; margin:0 auto;">
     <p class="section-label">Portfolio</p>
     <h2 class="section-title">Backing the companies shaping the future</h2>
-    <p class="section-text">Our portfolio is concentrated in a small number of high-conviction positions in companies we believe will be among the most consequential of the 21st century.</p>
+    <p class="section-text">Our portfolio is intentionally concentrated. We hold a small number of high-conviction positions in companies we believe will be among the most consequential of the 21st century. Our strategy favors depth over breadth - fewer names, larger positions, longer holding periods.</p>
   </div>
   <div class="portfolio-grid">
     <div class="portfolio-card">
@@ -786,8 +869,11 @@
     <div class="founder-content">
       <p class="section-label">Founder</p>
       <h2 class="section-title">Anish Philip</h2>
+      <p class="founder-micro">Background</p>
       <p class="section-text">Founder, CEO, and sole General Partner of Spacefaring Ventures, Anish built the firm from the ground up as a solo GP - raising capital, making every investment decision, managing LP relationships, and directing strategy entirely alone.</p>
+      <p class="founder-micro">Investment Origins</p>
       <p class="section-text">His investing journey began in 2013 with an early, high-conviction position in Tesla - years before the company's thesis was widely accepted. That contrarian bet, held through significant volatility and widespread skepticism, became the foundation for his broader approach: first-principles analysis of converging technology waves across autonomy, AI, robotics, energy, and space.</p>
+      <p class="founder-micro">Technical Edge</p>
       <p class="section-text">Anish combines nearly two decades of software engineering experience at world-class technology companies with deep technical fluency that informs every investment decision. A first-generation immigrant, he built his career, his fund, and his track record independently - without family wealth, institutional networks, or conventional credentials in finance or venture capital.</p>
     </div>
   </div>
@@ -798,8 +884,18 @@
   <div class="contact-inner">
     <p class="section-label">Get In Touch</p>
     <h2 class="section-title" style="margin: 0 auto 1.5rem;">Let's talk about the future</h2>
-    <p class="section-text" style="max-width: none; margin-bottom: 2rem;">For inquiries about our funds, partnership opportunities, or to learn more about our investment thesis.</p>
-    <a href="mailto:ir@spacefaring.ventures">ir@spacefaring.ventures</a>
+    <div class="contact-paths">
+      <div class="contact-path">
+        <h4>For Investors</h4>
+        <p>Qualified investors seeking concentrated exposure to frontier technology through our fund vehicles.</p>
+        <a href="mailto:ir@spacefaring.ventures">ir@spacefaring.ventures</a>
+      </div>
+      <div class="contact-path">
+        <h4>Founders &amp; Opportunities</h4>
+        <p>Founders, operators, or secondary-market opportunities aligned with our investment thesis.</p>
+        <a href="mailto:ir@spacefaring.ventures">ir@spacefaring.ventures</a>
+      </div>
+    </div>
     <p class="contact-note">Spacefaring Ventures LLC is a SEC Exempt Reporting Adviser (CRD# 342085)</p>
   </div>
 </section>
