@@ -213,8 +213,41 @@
     line-height: 1.8;
   }
 
-  /* THESIS */
-  .thesis { border-bottom: 1px solid var(--border); }
+  /* SECTION CONTRAST - subtle radial glows for visual differentiation */
+  .thesis {
+    border-bottom: 1px solid var(--border);
+    position: relative;
+  }
+  .thesis::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: radial-gradient(ellipse at 80% 20%, rgba(74, 125, 255, 0.04) 0%, transparent 55%);
+    pointer-events: none;
+  }
+  .portfolio::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: radial-gradient(ellipse at 20% 80%, rgba(56, 189, 248, 0.03) 0%, transparent 55%);
+    pointer-events: none;
+  }
+  .conviction::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: radial-gradient(ellipse at 70% 50%, rgba(167, 139, 250, 0.03) 0%, transparent 55%);
+    pointer-events: none;
+  }
+  .founder::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: radial-gradient(ellipse at 30% 30%, rgba(52, 211, 153, 0.03) 0%, transparent 55%);
+    pointer-events: none;
+  }
+
+  /* THESIS (original) */
   .thesis-pillars {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -249,6 +282,7 @@
   .portfolio {
     padding: 7rem 4rem;
     border-bottom: 1px solid var(--border);
+    position: relative;
   }
   .portfolio-grid {
     display: grid;
@@ -350,6 +384,7 @@
     padding: 7rem 4rem;
     border-top: 1px solid var(--border);
     border-bottom: 1px solid var(--border);
+    position: relative;
   }
   .conviction-inner {
     max-width: 1100px;
@@ -411,6 +446,7 @@
   .founder {
     padding: 7rem 4rem;
     border-bottom: 1px solid var(--border);
+    position: relative;
   }
   .founder-inner {
     max-width: 1100px;
@@ -574,9 +610,8 @@
   .hamburger.active span:nth-child(2) { opacity: 0; }
   .hamburger.active span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
 
-  @media (max-width: 600px) {
+  @media (max-width: 900px) {
     .hamburger { display: block; }
-    nav { padding: 1rem 1.5rem; }
     .nav-links {
       display: none;
       flex-direction: column;
@@ -593,6 +628,9 @@
     }
     .nav-links.open { display: flex; }
     .nav-links a { font-size: 1rem; letter-spacing: 0.14em; }
+  }
+  @media (max-width: 600px) {
+    nav { padding: 1rem 1.5rem; }
     .hero { padding: 7rem 1.5rem 3rem; }
     section, .portfolio, .conviction, .contact, .founder { padding: 3rem 1.5rem; }
     .metrics-grid { grid-template-columns: 1fr 1fr; }
@@ -837,6 +875,34 @@
     });
   }, { threshold: 0.15 });
   fadeEls.forEach(function(el){ fadeObserver.observe(el); });
+
+  /* FIX: Force fade-in visible when clicking nav anchors */
+  links.forEach(function(a){
+    a.addEventListener("click", function(){
+      var id = a.getAttribute("href").replace("#","");
+      var target = document.getElementById(id);
+      if(!target) return;
+      /* Reveal all fade-in elements inside the target section */
+      var children = target.querySelectorAll(".fade-in");
+      children.forEach(function(child){
+        child.classList.add("visible");
+        fadeObserver.unobserve(child);
+      });
+      /* Also reveal the section itself if it has fade-in */
+      if(target.classList.contains("fade-in")){
+        target.classList.add("visible");
+        fadeObserver.unobserve(target);
+      }
+      /* Reveal direct child containers that are fade-in targets */
+      var parent = target.closest(".mission, .conviction, .portfolio, .founder, .contact, .thesis");
+      if(parent){
+        parent.querySelectorAll(".fade-in").forEach(function(child){
+          child.classList.add("visible");
+          fadeObserver.unobserve(child);
+        });
+      }
+    });
+  });
 
   /* COUNTER ANIMATION */
   var metricH3s = document.querySelectorAll(".metric-item h3");
