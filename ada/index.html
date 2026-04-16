@@ -334,13 +334,29 @@ How can I help you today?</div>
   var sendBtn = document.getElementById('send-btn');
   var messages = document.getElementById('messages');
 
+  function renderText(text) {
+    // Strip markdown formatting that Claude might include
+    var s = text;
+    // Bold: **text** or __text__
+    s = s.replace(/\*\*(.+?)\*\*/g, '$1');
+    s = s.replace(/__(.+?)__/g, '$1');
+    // Italic: *text* or _text_
+    s = s.replace(/\*(.+?)\*/g, '$1');
+    s = s.replace(/_(.+?)_/g, '$1');
+    // Headers: ### text
+    s = s.replace(/^#{1,6}\s+/gm, '');
+    // Bullet points: - item or * item at start of line
+    s = s.replace(/^[\-\*]\s+/gm, '- ');
+    return s;
+  }
+
   function addMsg(text, type) {
     var div = document.createElement('div');
     div.className = 'msg ' + type;
     if (type === 'bot typing') {
       div.innerHTML = '<span class="dots"><span>.</span><span>.</span><span>.</span></span>';
     } else {
-      div.textContent = text;
+      div.textContent = renderText(text);
     }
     messages.appendChild(div);
     messages.scrollTop = messages.scrollHeight;
