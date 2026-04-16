@@ -11,1043 +11,190 @@
 <meta charset="UTF-8">
 <meta name="copyright" content="Copyright 2026 Spacefaring Ventures LLC. All rights reserved.">
 <meta name="author" content="Spacefaring Ventures LLC">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Spacefaring Ventures</title>
-<meta name="description" content="Spacefaring Ventures invests in generational founder-led companies building technologies that will define the next millennium - from space exploration to digital superintelligence.">
-<meta property="og:title" content="Spacefaring Ventures">
-<meta property="og:description" content="We invest in generational founder-led companies building technologies that will define the next millennium - from space exploration to digital superintelligence.">
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://www.spacefaring.ventures/">
-<meta property="og:image" content="https://www.spacefaring.ventures/og-image.png">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Spacefaring Ventures">
-<meta name="twitter:description" content="We invest in generational founder-led companies building technologies that will define the next millennium - from space exploration to digital superintelligence.">
-<meta name="twitter:image" content="https://www.spacefaring.ventures/og-image.png">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Ada - Spacefaring Ventures AI Assistant</title>
+<meta name="description" content="Spacefaring Ventures AI Assistant">
+<meta name="robots" content="noindex, nofollow">
 <link rel="icon" type="image/png" href="/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500&family=Lato:wght@100;300;400&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg-primary: #050507;
-    --bg-secondary: #08090e;
-    --bg-card: #0c0e15;
-    --text-primary: #ffffff;
-    --text-secondary: #c8d0e0;
-    --text-muted: #6b7a94;
-    --accent: #ffffff;
-    --accent-blue: #4a7dff;
-    --accent-glow: rgba(74, 125, 255, 0.15);
-    --accent-cyan: #38bdf8;
-    --accent-violet: #a78bfa;
-    --accent-emerald: #34d399;
-    --border: rgba(255,255,255,0.05);
-    --font-display: 'Outfit', sans-serif;
-    --font-body: 'Lato', sans-serif;
+    --bg-primary: #050507; --bg-card: #0c0e15;
+    --text-primary: #ffffff; --text-secondary: #c8d0e0; --text-muted: #6b7a94;
+    --accent-blue: #4a7dff; --border: rgba(255,255,255,0.05);
+    --font-display: 'Outfit', sans-serif; --font-body: 'Lato', sans-serif;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  html { scroll-behavior: smooth; }
+  html, body { height: 100%; overflow: hidden; width: 100%; max-width: 100%; }
   body {
-    font-family: var(--font-body);
-    background: #030305;
-    color: var(--text-primary);
-    line-height: 1.7;
+    font-family: var(--font-body); background: #030305; color: var(--text-primary);
     -webkit-font-smoothing: antialiased;
+    overflow: hidden;
+    -webkit-text-size-adjust: 100%;
   }
-  /* STARFIELD CANVAS */
   #starfield {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100vw; height: 100vh;
-    z-index: 0;
-    pointer-events: none;
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    z-index: 0; pointer-events: none;
   }
-  /* NAV */
-  nav {
-    position: fixed; top: 0; left: 0; right: 0;
-    z-index: 100;
-    padding: 1.5rem 4rem;
-    display: flex; justify-content: space-between; align-items: center;
-    background: rgba(5,5,7,0.88);
+  /* --- CHAT SCREEN --- */
+  #chat-screen {
+    display: flex; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    flex-direction: column; z-index: 10;
+    overflow: hidden;
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+  header {
+    position: relative; z-index: 10;
+    padding: 1.2rem 2rem;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    background: rgba(5, 5, 7, 0.88);
     backdrop-filter: blur(24px);
-    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
   }
-  .nav-logo {
+  header h1 {
+    font-family: var(--font-display); font-weight: 300; font-size: 1.1rem;
+    letter-spacing: 0.22em; text-transform: uppercase;
+  }
+  header .badge {
     font-family: var(--font-display);
-    font-weight: 300;
-    font-size: 1.1rem;
-    letter-spacing: 0.22em;
-    color: var(--text-primary);
-    text-decoration: none;
-    text-transform: uppercase;
+    padding: 0.25rem 0.8rem; border-radius: 20px; font-size: 0.68rem;
+    letter-spacing: 0.1em; text-transform: none; font-weight: 300;
+    border: 1px solid rgba(74, 125, 255, 0.3); color: var(--accent-blue);
+    background: rgba(74, 125, 255, 0.06);
   }
-  .nav-logo span { color: var(--accent); }
-  .nav-links { display: flex; gap: 2.5rem; }
-  .nav-links a {
-    font-family: var(--font-display);
-    font-size: 0.82rem;
-    font-weight: 300;
-    letter-spacing: 0.14em;
-    color: var(--accent-blue);
-    text-decoration: none;
-    text-transform: uppercase;
-    transition: color 0.3s;
+  #messages {
+    position: relative; z-index: 10;
+    flex: 1; overflow-y: auto; padding: 1.5rem 2rem; display: flex;
+    flex-direction: column; gap: 1rem;
+    scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.08) transparent;
   }
-  .nav-links a:hover { color: #6b9aff; }
-  .nav-links a.active { color: #ffffff; }
-  /* HERO */
-  .hero {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    padding: 8rem 2rem 4rem;
-    position: relative;
-    overflow: hidden;
-  }
-  .hero::before {
-    display: none;
-  }
-  .hero-eyebrow {
-    font-family: var(--font-display);
-    font-size: 0.65rem; letter-spacing: 0.06em;
-    font-weight: 300;
-    letter-spacing: 0.4em;
-    text-transform: uppercase;
-    color: var(--accent);
-    margin-bottom: 2rem;
+  .msg {
+    max-width: 720px; padding: 0.85rem 1.1rem; border-radius: 14px;
+    font-size: 0.9rem; line-height: 1.65; font-weight: 300; color: var(--text-secondary);
+    white-space: pre-wrap; word-wrap: break-word;
     position: relative;
   }
-  .hero h1 {
-    font-family: var(--font-display);
-    font-size: clamp(2.8rem, 6vw, 5rem);
-    font-weight: 200;
-    line-height: 1.15;
-    max-width: 900px;
-    letter-spacing: 0.03em;
-    position: relative;
-  }
-  .hero h1 strong {
-    font-weight: 400;
-    background: linear-gradient(135deg, #ffffff 0%, #6b9aff 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-  .hero-sub {
-    font-family: var(--font-body);
-    font-size: 1.15rem;
-    font-weight: 300;
-    color: var(--text-secondary);
-    max-width: 600px;
-    margin-top: 2rem;
-    position: relative;
-    letter-spacing: 0.01em;
-  }
-  .hero-proof {
-    display: flex;
-    gap: 2.5rem;
-    margin-top: 2.5rem;
-    position: relative;
-  }
-  .hero-proof span {
-    font-family: var(--font-display);
-    font-size: 0.8rem;
-    font-weight: 300;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-  }
-  .hero-proof span strong {
-    display: block;
-    font-family: var(--font-display);
-    font-size: 1.6rem;
-    font-weight: 200;
-    letter-spacing: 0.02em;
-    color: var(--text-primary);
-    margin-bottom: 0.25rem;
-    text-transform: none;
-  }
-  @media (max-width: 600px) {
-    .hero-proof { gap: 1.5rem; flex-wrap: wrap; justify-content: center; }
-    .hero-proof span strong { font-size: 1.3rem; }
-  }
-  /* MISSION */
-  .mission {
-    padding: 6rem 4rem;
-    border-top: 1px solid var(--border);
-    border-bottom: 1px solid var(--border);
+  .msg.bot {
+    align-self: flex-start;
     background: transparent;
-    text-align: center;
-  }
-  .mission-inner {
-    max-width: 850px;
-    margin: 0 auto;
-  }
-  .mission-label {
-    font-family: var(--font-display);
-    font-size: 0.75rem;
-    font-weight: 300;
-    letter-spacing: 0.35em;
-    text-transform: uppercase;
-    color: var(--accent-blue);
-    margin-bottom: 2.5rem;
-  }
-  .mission-statement {
-    font-family: var(--font-body);
-    font-size: clamp(1.3rem, 2.5vw, 1.7rem);
-    font-weight: 300;
-    line-height: 1.7;
-    color: var(--text-primary);
-    letter-spacing: 0.01em;
-  }
-  .mission-note {
-    font-family: var(--font-body);
-    font-size: 0.95rem;
-    font-weight: 300;
-    color: var(--text-secondary);
-    margin-top: 2.5rem;
-    max-width: 700px;
-    margin-left: auto;
-    margin-right: auto;
-    line-height: 1.8;
-  }
-  /* SECTIONS */
-  section {
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 7rem 4rem;
-  }
-  .section-label {
-    font-family: var(--font-display);
-    font-size: 0.75rem;
-    font-weight: 300;
-    letter-spacing: 0.3em;
-    text-transform: uppercase;
-    color: var(--accent-blue);
-    margin-bottom: 1.5rem;
-  }
-  .section-title {
-    font-family: var(--font-display);
-    font-size: clamp(1.8rem, 3vw, 2.6rem);
-    font-weight: 200;
-    line-height: 1.3;
-    max-width: 700px;
-    margin-bottom: 2rem;
-    letter-spacing: 0.02em;
-  }
-  .section-text {
-    font-family: var(--font-body);
-    font-size: 1.05rem;
-    font-weight: 300;
-    color: var(--text-secondary);
-    max-width: 650px;
-    line-height: 1.8;
-  }
-  /* SECTION CONTRAST - subtle radial glows for visual differentiation */
-  .thesis {
-    border-bottom: 1px solid var(--border);
-    position: relative;
-  }
-  .thesis::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: radial-gradient(ellipse at 80% 20%, rgba(74, 125, 255, 0.04) 0%, transparent 55%);
-    pointer-events: none;
-  }
-  .portfolio::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: radial-gradient(ellipse at 20% 80%, rgba(56, 189, 248, 0.03) 0%, transparent 55%);
-    pointer-events: none;
-  }
-  .conviction::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: radial-gradient(ellipse at 70% 50%, rgba(167, 139, 250, 0.03) 0%, transparent 55%);
-    pointer-events: none;
-  }
-  .founder::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: radial-gradient(ellipse at 30% 30%, rgba(52, 211, 153, 0.03) 0%, transparent 55%);
-    pointer-events: none;
-  }
-  /* THESIS (original) */
-  .thesis-pillars {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 2rem;
-    margin-top: 3.5rem;
-  }
-  .pillar {
-    padding: 2rem;
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    background: transparent;
-    backdrop-filter: none;
-    transition: border-color 0.3s;
-  }
-  .pillar:hover { border-color: rgba(74,125,255,0.25); }
-  .pillar-icon { display: none; }
-  .pillar h4 {
-    font-family: var(--font-display);
-    font-size: 1.05rem;
-    font-weight: 300;
-    margin-bottom: 0.75rem;
-    letter-spacing: 0.02em;
-  }
-  .pillar p {
-    font-family: var(--font-body);
-    font-size: 0.9rem;
-    color: var(--text-secondary);
-    line-height: 1.7;
-    font-weight: 300;
-  }
-  /* PORTFOLIO */
-  .portfolio {
-    padding: 7rem 4rem;
-    border-bottom: 1px solid var(--border);
-    position: relative;
-  }
-  .portfolio-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 2rem;
-    margin-top: 3.5rem;
-    max-width: 1100px;
-    margin-left: auto;
-    margin-right: auto;
-  }
-  .portfolio-card {
-    padding: 2.5rem;
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    background: transparent;
-    backdrop-filter: none;
-    transition: border-color 0.3s, transform 0.3s;
-  }
-  .portfolio-card:hover {
-    border-color: rgba(74,125,255,0.2);
-    transform: translateY(-2px);
-  }
-  .portfolio-card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 1.25rem;
-  }
-  .portfolio-card h4 {
-    font-family: var(--font-display);
-    font-size: 1.4rem;
-    font-weight: 300;
-    letter-spacing: 0.02em;
-  }
-  .portfolio-tag {
-    font-family: var(--font-display);
-    font-size: 0.7rem;
-    font-weight: 300;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--accent-blue);
-    background: var(--accent-glow);
-    padding: 0.3rem 0.75rem;
-    border-radius: 20px;
-    white-space: nowrap;
-  }
-  .portfolio-card p {
-    font-family: var(--font-body);
-    font-size: 0.92rem;
-    color: var(--text-secondary);
-    line-height: 1.75;
-    font-weight: 300;
-  }
-  .portfolio-card .portfolio-meta {
-    margin-top: 1.25rem;
-    padding-top: 1.25rem;
-    border-top: 1px solid var(--border);
-    font-family: var(--font-body);
-    font-size: 0.8rem;
-    color: var(--text-muted);
-    font-weight: 300;
-    letter-spacing: 0.03em;
-  }
-  /* METRICS BAR */
-  .metrics {
-    padding: 4rem 4rem;
-    border-top: 1px solid var(--border);
-    border-bottom: 1px solid var(--border);
-    background: transparent;
-  }
-  .metrics-grid {
-    max-width: 1100px;
-    margin: 0 auto;
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 2rem;
-    text-align: center;
-  }
-  .metric-item h3 {
-    font-family: var(--font-display);
-    font-size: clamp(2rem, 3.5vw, 3rem);
-    font-weight: 200;
-    color: var(--text-primary);
-    letter-spacing: 0.01em;
-  }
-  .metric-item p {
-    font-family: var(--font-display);
-    font-size: 0.82rem;
-    font-weight: 300;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    margin-top: 0.5rem;
-  }
-  /* CONVICTION / STORY */
-  .conviction {
-    background: transparent;
-    padding: 7rem 4rem;
-    border-top: 1px solid var(--border);
-    border-bottom: 1px solid var(--border);
-    position: relative;
-  }
-  .conviction-inner {
-    max-width: 1100px;
-    margin: 0 auto;
-  }
-  .timeline {
-    margin-top: 3.5rem;
-    position: relative;
-    padding-left: 3rem;
-  }
-  .timeline::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 1px;
-    background: linear-gradient(to bottom, var(--accent-blue), var(--border));
-  }
-  .timeline-item {
-    margin-bottom: 3rem;
-    position: relative;
-  }
-  .timeline-item::before {
-    content: '';
-    position: absolute;
-    left: -3rem;
-    top: 0.5rem;
-    width: 7px; height: 7px;
-    border-radius: 50%;
-    background: var(--accent-blue);
-    box-shadow: 0 0 10px rgba(74,125,255,0.4);
-  }
-  .timeline-year {
-    font-family: var(--font-display);
-    font-size: 0.8rem;
-    font-weight: 300;
-    letter-spacing: 0.2em;
-    color: var(--accent);
-    margin-bottom: 0.5rem;
-  }
-  .timeline-item h4 {
-    font-family: var(--font-display);
-    font-size: 1.15rem;
-    font-weight: 300;
-    margin-bottom: 0.5rem;
-    letter-spacing: 0.02em;
-  }
-  .timeline-item p {
-    font-family: var(--font-body);
-    font-size: 0.92rem;
-    color: var(--text-secondary);
-    font-weight: 300;
-    line-height: 1.7;
-    max-width: 600px;
-  }
-  /* FOUNDER */
-  .founder {
-    padding: 7rem 4rem;
-    border-bottom: 1px solid var(--border);
-    position: relative;
-  }
-  .founder-inner {
-    max-width: 1100px;
-    margin: 0 auto;
-    display: grid;
-    grid-template-columns: 1fr 1.4fr;
-    gap: 4rem;
-    align-items: start;
-  }
-  .founder-image {
-    aspect-ratio: 3/4;
-    background: transparent;
-    border-radius: 12px;
-    border: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-  }
-  .founder-image-placeholder {
-    font-family: var(--font-display);
-    font-size: 0.8rem;
-    color: var(--text-muted);
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-  }
-  .founder-content .section-text { max-width: none; }
-  .founder-content .section-text + .section-text { margin-top: 1.25rem; }
-  .founder-micro {
-    font-family: var(--font-display);
-    font-size: 0.72rem;
-    font-weight: 300;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--accent-blue);
-    margin-bottom: 0.5rem;
-    margin-top: 2rem;
-  }
-  .founder-micro:first-of-type { margin-top: 0; }
-  .founder-credentials {
-    margin-top: 2rem;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-  }
-  .credential-tag {
-    font-family: var(--font-display);
-    font-size: 0.75rem;
-    letter-spacing: 0.05em;
-    font-weight: 300;
-    color: var(--text-secondary);
-    background: transparent;
-    border: 1px solid var(--border);
-    padding: 0.4rem 1rem;
-    border-radius: 20px;
-  }
-  /* CONTACT */
-  .contact {
-    padding: 7rem 4rem;
-    text-align: center;
-  }
-  .contact-inner {
-    max-width: 600px;
-    margin: 0 auto;
-  }
-  .contact a {
-    color: var(--accent-blue);
-    text-decoration: none;
-    font-family: var(--font-body);
-    font-size: 1.05rem;
-    font-weight: 300;
-    letter-spacing: 0.01em;
-    transition: color 0.3s;
-  }
-  .contact a:hover { color: #6b9aff; }
-  .contact-paths {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 2rem;
-    margin: 2.5rem auto 0;
-    max-width: 700px;
-    text-align: left;
-  }
-  .contact-path {
-    padding: 2rem;
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    background: transparent;
-    backdrop-filter: none;
-    transition: border-color 0.3s;
-  }
-  .contact-path:hover { border-color: rgba(74,125,255,0.25); }
-  .contact-path h4 {
-    font-family: var(--font-display);
-    font-size: 0.95rem;
-    font-weight: 300;
-    letter-spacing: 0.02em;
-    margin-bottom: 0.75rem;
-  }
-  .contact-path p {
-    font-family: var(--font-body);
-    font-size: 0.85rem;
-    color: var(--text-secondary);
-    font-weight: 300;
-    line-height: 1.7;
-    margin-bottom: 1.25rem;
-  }
-  .contact-path a {
-    font-size: 0.9rem;
-  }
-  .ada-card {
-    grid-column: 1 / -1;
-    max-width: 340px;
-    margin: 0 auto;
-    text-align: left;
-  }
-  @media (max-width: 600px) {
-    .contact-paths { grid-template-columns: 1fr; gap: 1.25rem; }
-    .ada-card { max-width: none; margin: 0; }
-  }
-  .contact-note {
-    margin-top: 2rem;
-    font-family: var(--font-body);
-    font-size: 0.85rem;
-    color: var(--text-muted);
-    font-weight: 300;
-  }
-  /* FOOTER */
-  footer {
-    padding: 2.5rem 4rem;
-    border-top: 1px solid var(--border);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  footer p {
-    font-family: var(--font-body);
-    font-size: 0.65rem; letter-spacing: 0.06em;
-    color: var(--text-muted);
-    letter-spacing: 0.03em;
-    font-weight: 300;
-  }
-  .footer-badge {
-    font-family: var(--font-display);
-    font-size: 0.7rem;
-    font-weight: 300;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    border: 1px solid var(--border);
-    padding: 0.4rem 0.8rem;
-    border-radius: 4px;
-  }
-  /* DISCLAIMER */
-  .disclaimer {
-    padding: 3rem 4rem 1rem;
-    border-top: 1px solid var(--border);
-    text-align: center;
-  }
-  .disclaimer p {
-    font-family: var(--font-body);
-    font-size: 0.72rem;
-    color: var(--text-muted);
-    font-weight: 300;
-    line-height: 1.8;
-    max-width: 100%;
-    margin: 0 auto;
-    letter-spacing: 0.01em;
-  }
-  /* SCROLL ANIMATIONS */
-  .fade-in {
-    opacity: 0;
-    transform: translateY(24px);
-    transition: opacity 0.7s ease, transform 0.7s ease;
-  }
-  .fade-in.fade-in-large {
-    transform: translateY(44px);
-    transition: opacity 0.9s ease, transform 0.9s ease;
-  }
-  .fade-in.visible {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  .timeline-item { transition-delay: calc(var(--i, 0) * 0.12s); }
-  /* RESPONSIVE */
-  @media (max-width: 900px) {
-    nav { padding: 1.25rem 2rem; }
-    section, .portfolio, .conviction, .contact, .founder { padding: 4rem 2rem; }
-    .metrics { padding: 3rem 2rem; }
-    .metrics-grid { grid-template-columns: repeat(2, 1fr); gap: 0.8rem; }
-    .thesis-pillars { grid-template-columns: 1fr; }
-    .portfolio-grid { grid-template-columns: 1fr; }
-    .founder-inner { grid-template-columns: 1fr; }
-    .founder-image { max-width: 320px; }
-    .mission { padding: 4rem 2rem; }
-    footer { flex-direction: column; gap: 1rem; text-align: center; }
-  }
-  /* HAMBURGER MENU */
-  .hamburger {
-    display: none;
-    background: none;
     border: none;
-    cursor: pointer;
-    padding: 0.5rem;
-    z-index: 103;
   }
-  .hamburger span {
-    display: block;
-    width: 22px;
-    height: 1.5px;
-    background: var(--text-primary);
-    margin: 5px 0;
-    transition: transform 0.3s, opacity 0.3s;
+  .copy-btn {
+    display: block; margin-top: 0.5rem; margin-left: auto;
+    background: none; border: none; cursor: pointer;
+    opacity: 0; transition: opacity 0.2s;
+    padding: 0.3rem; border-radius: 6px;
   }
-  .hamburger.active span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
-  .hamburger.active span:nth-child(2) { opacity: 0; }
-  .hamburger.active span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
-  @media (max-width: 900px) {
-    .hamburger { display: block; }
-    .nav-links {
-      display: none;
-      flex-direction: column;
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      height: 100vh; width: 100vw;
-      background: rgba(5,5,7,0.98);
-      backdrop-filter: blur(24px);
-      justify-content: center;
-      align-items: center;
-      gap: 2rem;
-      z-index: 102;
-      padding: 5rem 0;
-    }
-    .nav-links.open { display: flex; }
-    .nav-links a { font-size: 1rem; letter-spacing: 0.14em; }
+  .copy-btn:hover, .copy-btn:active { background: rgba(255,255,255,0.08); }
+  .copy-btn svg { width: 15px; height: 15px; fill: none; stroke: var(--text-muted); stroke-width: 1.8; }
+  .copy-btn.copied svg { stroke: var(--accent-blue); }
+  .msg.bot:hover .copy-btn { opacity: 1; }
+  @media (max-width: 600px) {
+    .copy-btn { opacity: 0.5; }
+  }
+  .msg.user {
+    align-self: flex-end;
+    background: transparent;
+    border: none;
+    color: #ffffff;
+  }
+  .msg.typing { color: var(--text-muted); font-style: italic; }
+  .msg.typing .dots { display: inline-block; }
+  .msg.typing .dots span {
+    animation: blink 1.4s infinite both;
+    font-style: normal; font-size: 1.1em;
+  }
+  .msg.typing .dots span:nth-child(2) { animation-delay: 0.2s; }
+  .msg.typing .dots span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes blink {
+    0%, 80%, 100% { opacity: 0.2; }
+    40% { opacity: 1; }
+  }
+  #input-area {
+    position: relative; z-index: 10;
+    padding: 1rem 2rem 1.2rem;
+    border-top: 1px solid var(--border);
+    display: flex; gap: 0.75rem; align-items: center;
+    background: rgba(5, 5, 7, 0.88);
+    backdrop-filter: blur(24px);
+    flex-shrink: 0;
+  }
+  #question {
+    flex: 1; background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08); border-radius: 10px;
+    padding: 0.75rem 1rem; color: #ffffff; font-family: var(--font-body);
+    font-size: 0.9rem; font-weight: 300; outline: none;
+  }
+  #question::placeholder { color: var(--text-muted); }
+  #question:focus { border-color: rgba(74, 125, 255, 0.35); }
+  #send-btn {
+    background: var(--accent-blue); border: none; border-radius: 10px;
+    width: 44px; height: 44px; display: flex; align-items: center;
+    justify-content: center; cursor: pointer; transition: background 0.2s;
+    flex-shrink: 0;
+  }
+  #send-btn:hover { background: #6b9aff; }
+  #send-btn:disabled { background: #2a3a5a; cursor: not-allowed; }
+  #send-btn svg { width: 18px; height: 18px; fill: white; }
+  footer {
+    position: relative; z-index: 10;
+    padding: 0.5rem 2rem; text-align: center; font-size: 0.62rem;
+    color: var(--text-muted); font-weight: 300; flex-shrink: 0;
+    background: rgba(5, 5, 7, 0.88);
+    border-top: 1px solid rgba(255,255,255,0.03);
   }
   @media (max-width: 600px) {
-    nav { padding: 1rem 1.5rem; }
-    .hero { padding: 7rem 1.5rem 3rem; }
-    section, .portfolio, .conviction, .contact, .founder { padding: 3rem 1.5rem; }
-    .metrics-grid { grid-template-columns: 1fr 1fr; }
-    .mission { padding: 3rem 1.5rem; }
+    #messages { padding: 1rem; }
+    #input-area { padding: 0.75rem 0.75rem; gap: 0.5rem; }
+    #question { font-size: 16px; }
+    #send-btn { width: 40px; height: 40px; min-width: 40px; }
+    header { padding: 0.75rem 1rem; }
+    footer { padding: 0.5rem 1rem; font-size: 0.58rem; }
   }
 </style>
 </head>
 <body>
-<!-- ANIMATED STARFIELD BACKGROUND -->
 <canvas id="starfield"></canvas>
-<!-- NAVIGATION -->
-<nav>
-  <a href="#" class="nav-logo"><span>S</span>pacefaring Ventures</a>
-  <button class="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
-  <div class="nav-links">
-    <a href="#mission">Mission</a>
-    <a href="#thesis">Thesis</a>
-    <a href="#portfolio">Portfolio</a>
-    <a href="#story">Story</a>
-    <a href="#founder">Founder</a>
-    <a href="#contact">Contact</a>
+
+<!-- CHAT SCREEN -->
+<div id="chat-screen">
+  <header>
+    <a href="https://www.spacefaring.ventures/" style="text-decoration:none;color:inherit"><h1>Spacefaring Ventures</h1></a>
+    <div class="badge">Ada</div>
+  </header>
+  <div id="messages">
+    <div class="msg bot">Welcome to Spacefaring Ventures. My name is Ada and I'm an AI assistant that provides general information about our firm. Nothing here constitutes financial, investment, or legal advice, and no information provided should be relied upon for investment decisions. For formal inquiries, please email ir@spacefaring.ventures.
+
+How can I help you today?</div>
   </div>
-</nav>
-<!-- HERO -->
-<section class="hero">
-  <h1>Accelerating the advent of an <strong>exciting future</strong></h1>
-  <p class="hero-sub">Investing in generational founder-led companies building technologies that will define the next millennium - from space exploration to digital superintelligence.</p>
-  <div class="hero-proof">
-    <span><strong>11</strong>Funds</span>
-    <span><strong>40+</strong>Investors</span>
-    <span><strong>9 Figures</strong>Aggregate Asset Value</span>
-    <span><strong>2020</strong>Founded</span>
+  <div id="input-area">
+    <input type="text" id="question" placeholder="Ask a question about Spacefaring Ventures..." maxlength="500" autocomplete="off" autofocus>
+    <button id="send-btn" aria-label="Send">
+      <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+    </button>
   </div>
-</section>
-<!-- MISSION -->
-<div class="mission" id="mission">
-  <div class="mission-inner">
-    <p class="mission-label">Our Mission</p>
-    <p class="mission-statement">Solve humanity's most important problems and accelerate the advent of an exciting future by investing in the world's best technology companies.</p>
-    <p class="mission-note">The name "Spacefaring" reflects our deepest conviction: that humanity's future lies beyond the boundaries of what is known today. For us, spacefaring is not merely about traveling beyond Earth, but about pursuing ventures as vast, open-ended, and limitless as space itself.</p>
-    <p class="mission-note">It represents the drive to push past every boundary, expand the frontiers of what is possible, and back the companies building technologies that will carry civilization forward - in space, intelligence, autonomy, robotics, energy, and other foundational technologies of the future.</p>
-  </div>
+  <footer>This AI assistant provides general information only and does not constitute financial, investment, legal, or tax advice. Nothing here is an offer or solicitation to buy or sell securities. For formal inquiries, email ir@spacefaring.ventures.</footer>
 </div>
-<!-- THESIS -->
-<section class="thesis" id="thesis">
-  <p class="section-label">Investment Thesis</p>
-  <h2 class="section-title">First-principles conviction in converging technology waves</h2>
-  <p class="section-text">We identify generational founder-led companies at the intersection of autonomy, digital superintelligence, robotics, energy, and space - then back them with deep conviction and an extremely long time horizon that spans multiple decades.</p>
-  <div class="thesis-pillars">
-    <div class="pillar">
-      <div class="pillar-icon cyan">&#9672;</div>
-      <h4>Frontier Technology</h4>
-      <p>We invest in companies building at the edge of what is possible - technologies that expand the boundaries of human capability and reshape entire industries.</p>
-    </div>
-    <div class="pillar">
-      <div class="pillar-icon violet">&#9670;</div>
-      <h4>Contrarian Conviction</h4>
-      <p>Our investment approach emphasizes contrarian positions backed by rigorous first-principles analysis, held through volatility and skepticism until the thesis plays out.</p>
-    </div>
-    <div class="pillar">
-      <div class="pillar-icon emerald">&#9671;</div>
-      <h4>Decades, Not Quarters</h4>
-      <p>We think in decades, not quarters. The most consequential companies require patient capital and the willingness to endure short-term noise for long-term compounding.</p>
-    </div>
-  </div>
-</section>
-<!-- PORTFOLIO -->
-<section class="portfolio" id="portfolio">
-  <div style="max-width:1100px; margin:0 auto;">
-    <p class="section-label">Portfolio</p>
-    <h2 class="section-title">Backing the companies shaping the future</h2>
-    <p class="section-text">Our portfolio is intentionally concentrated. Our funds hold a small number of high-conviction positions in companies we believe will be among the most consequential of the 21st century. Our strategy favors depth over breadth - fewer names, larger positions, longer holding periods.</p>
-  </div>
-  <div class="portfolio-grid">
-    <div class="portfolio-card">
-      <div class="portfolio-card-header">
-        <h4>SpaceX</h4>
-      </div>
-      <p>Widely regarded as the world's most valuable private company and the leader in orbital launch. SpaceX has rewritten the economics of space access through reusable rocketry, built the world's largest satellite constellation with Starlink, and is now developing Starship - a fully reusable super heavy-lift vehicle designed for interplanetary transport and establishing a permanent human presence on Mars.</p>
-      <div class="portfolio-meta">Invested since 2021 &middot; Multiple Fund vehicles</div>
-    </div>
-    <div class="portfolio-card">
-      <div class="portfolio-card-header">
-        <h4>xAI</h4>
-      </div>
-      <p>Founded with the mission to understand the true nature of the universe, xAI is building frontier AI systems that accelerate scientific discovery. With Colossus - one of the largest GPU training clusters ever constructed - and Grok models pushing the boundaries of reasoning and multimodal understanding, xAI stands at the vanguard of the intelligence revolution.</p>
-      <div class="portfolio-meta">Invested since 2025 &middot; Multiple fund vehicles</div>
-    </div>
-  </div>
-</section>
-<!-- METRICS -->
-<div class="metrics">
-  <div class="metrics-grid">
-    <div class="metric-item">
-      <h3>11</h3>
-      <p>Funds</p>
-    </div>
-    <div class="metric-item">
-      <h3>40+</h3>
-      <p>Accredited Investors Worldwide</p>
-    </div>
-    <div class="metric-item">
-      <h3>9 Figures</h3>
-      <p>Aggregate Asset Value</p>
-    </div>
-    <div class="metric-item">
-      <h3>2020</h3>
-      <p>Founded</p>
-    </div>
-  </div>
-</div>
-<!-- CONVICTION / STORY -->
-<div class="conviction" id="story">
-  <div class="conviction-inner">
-    <p class="section-label">Our Story</p>
-    <h2 class="section-title">Over a decade of conviction investing</h2>
-    <p class="section-text">Spacefaring Ventures was born from a simple but powerful insight - that the most important technologies of our time were being systematically undervalued by mainstream investors.</p>
-    <div class="timeline">
-      <div class="timeline-item">
-        <div class="timeline-year">2013</div>
-        <h4>The Tesla bet</h4>
-        <p>An early, high-conviction position in Tesla - years before the company's thesis was widely accepted. Held through nearly a decade of significant volatility and widespread skepticism, this experience shaped the investment philosophy that guides the firm today.</p>
-      </div>
-      <div class="timeline-item">
-        <div class="timeline-year">2020</div>
-        <h4>Spacefaring Ventures founded</h4>
-        <p>Built from the ground up as a solo GP - raising capital, making all investment decisions, managing LP relationships, and directing strategy independently. No institutional backing, no family wealth, no conventional VC credentials. Just first principles and conviction.</p>
-      </div>
-      <div class="timeline-item">
-        <div class="timeline-year">2021</div>
-        <h4>SpaceX - first funds deployed</h4>
-        <p>Launched the first fund vehicles to provide investors access to SpaceX equity on the secondary market. The first three funds, all 2021 vintage, have now been held for five years - a testament to patient, long-term conviction. The thesis: SpaceX was the single most important infrastructure company being built, and most investors were structurally locked out.</p>
-      </div>
-      <div class="timeline-item">
-        <div class="timeline-year">2025</div>
-        <h4>xAI - expanding the frontier</h4>
-        <p>Expanded into frontier AI with investments in xAI, recognizing the convergence between space infrastructure and digital superintelligence as the defining technology axis of the coming decades.</p>
-      </div>
-      <div class="timeline-item">
-        <div class="timeline-year">2026</div>
-        <h4>SEC Exempt Reporting Adviser</h4>
-        <p>Became a SEC Exempt Reporting Adviser, reflecting the firm's growth and increasing formalization of its compliance and reporting infrastructure as it scales across 11 fund vehicles and over 40 accredited investors worldwide to hundreds of millions of dollars in aggregate asset value across all fund vehicles.</p>
-      </div>
-    </div>
-  </div>
-</div>
-<!-- FOUNDER -->
-<section class="founder" id="founder">
-  <div class="founder-inner">
-    <div class="founder-image">
-      <img src="https://lh3.googleusercontent.com/d/1R7h8RdNbYquU4_y1RfQ2e8G5r-BdqpT0=w500" alt="Anish Philip - Founder of Spacefaring Ventures" style="width:100%;height:100%;object-fit:cover;">
-    </div>
-    <div class="founder-content">
-      <p class="section-label">Founder</p>
-      <h2 class="section-title">Anish Philip</h2>
-      <p class="founder-micro">Background</p>
-      <p class="section-text">Founder, CEO, and sole General Partner of Spacefaring Ventures, Anish built the firm from the ground up as a solo GP - raising capital, making every investment decision, managing LP relationships, and directing strategy independently.</p>
-      <p class="founder-micro">Investment Origins</p>
-      <p class="section-text">His investing journey began in 2013 with an early, high-conviction position in Tesla - years before the company's thesis was widely accepted. That contrarian bet, held through significant volatility and widespread skepticism, became the foundation for his broader approach: first-principles analysis of converging technology waves across autonomy, AI, robotics, energy, and space.</p>
-      <p class="founder-micro">Technical Edge</p>
-      <p class="section-text">Anish combines nearly two decades of software engineering experience at world-class technology companies with deep technical fluency that informs every investment decision. A first-generation immigrant, he built his career, his fund, and his track record independently - without family wealth, institutional networks, or conventional credentials in finance or venture capital.</p>
-    </div>
-  </div>
-</section>
-<!-- CONTACT -->
-<section class="contact" id="contact">
-  <div class="contact-inner">
-    <p class="section-label">Get In Touch</p>
-    <h2 class="section-title" style="margin: 0 auto 1.5rem;">Let's talk about the future</h2>
-    <div class="contact-paths">
-      <div class="contact-path">
-        <h4>For Investors</h4>
-        <p>Accredited investors seeking concentrated exposure to frontier technology through our fund vehicles.</p>
-        <a href="mailto:ir@spacefaring.ventures">ir@spacefaring.ventures</a>
-      </div>
-      <div class="contact-path">
-        <h4>Founders &amp; Opportunities</h4>
-        <p>Founders, operators, or secondary-market opportunities aligned with our investment thesis.</p>
-        <a href="mailto:ir@spacefaring.ventures">ir@spacefaring.ventures</a>
-      </div>
-      <div class="contact-path ada-card">
-        <h4>Quick Questions</h4>
-        <p>Ada, our AI assistant, can answer most frequently asked questions about the firm and our funds.</p>
-        <a href="#" id="ada-open">Chat with Ada</a>
-      </div>
-    </div>
-    <p class="contact-note">Spacefaring Ventures LLC is a SEC Exempt Reporting Adviser (CRD# 342085)</p>
-  </div>
-</section>
-<!-- DISCLAIMER -->
-<div class="disclaimer">
-  <p>This website is for informational purposes only and does not constitute an offer to sell or a solicitation of an offer to buy any security in any jurisdiction. Any such offer or solicitation will be made only by means of confidential offering documents, which will be furnished to qualified investors on a confidential basis at their request. Investments in Spacefaring Ventures funds are available only to investors who meet the qualifications set forth in the applicable offering documents. Past performance is not indicative of future results. The value of investments and the income derived from them can go down as well as up, and investors may not receive back the amount originally invested. Any performance data or metrics referenced on this site reflect historical results and should not be relied upon as a prediction or guarantee of future performance. Spacefaring Ventures LLC is a SEC Exempt Reporting Adviser (CRD# 342085). Filing as an exempt reporting adviser does not imply a certain level of skill or training, nor does it constitute endorsement by the SEC.</p>
-</div>
-<!-- FOOTER -->
-<footer>
-  <p>&copy; 2026 Spacefaring Ventures LLC. All rights reserved.</p>
-  <span class="footer-badge">San Francisco Bay Area</span>
-</footer>
-<script>
-(function(){
-  /* NAV ACTIVE STATE */
-  var links = document.querySelectorAll(".nav-links a");
-  var sections = [];
-  links.forEach(function(a){
-    var id = a.getAttribute("href").replace("#","");
-    var el = document.getElementById(id);
-    if(el) sections.push({link:a, el:el});
-  });
-  function update(){
-    var scrollY = window.scrollY + 120;
-    var active = null;
-    var atBottom = (window.innerHeight + window.scrollY) >= (document.body.scrollHeight - 50);
-    if(atBottom && sections.length > 0){
-      active = sections[sections.length - 1];
-    } else {
-      sections.forEach(function(s){
-        if(s.el.offsetTop <= scrollY) active = s;
-      });
-    }
-    links.forEach(function(a){ a.classList.remove("active"); });
-    if(active) active.link.classList.add("active");
-  }
-  window.addEventListener("scroll", update, {passive:true});
-  update();
-  /* HAMBURGER MENU */
-  var hamburger = document.querySelector(".hamburger");
-  var navLinks = document.querySelector(".nav-links");
-  if(hamburger){
-    hamburger.addEventListener("click", function(){
-      hamburger.classList.toggle("active");
-      navLinks.classList.toggle("open");
-    });
-    navLinks.querySelectorAll("a").forEach(function(a){
-      a.addEventListener("click", function(){
-        hamburger.classList.remove("active");
-        navLinks.classList.remove("open");
-      });
-    });
-  }
-  /* SCROLL FADE-IN */
-  var fadeEls = document.querySelectorAll(".mission-inner, .thesis .section-label, .thesis .section-title, .thesis .section-text, .pillar, .portfolio .section-label, .portfolio .section-title, .portfolio .section-text, .portfolio-card, .metric-item, .timeline-item, .founder-image, .founder-content, .contact-inner, .contact-path");
-  var timelineIdx = 0;
-  fadeEls.forEach(function(el){
-    el.classList.add("fade-in");
-    if(el.classList.contains("portfolio-card") || el.classList.contains("contact-path")){
-      el.classList.add("fade-in-large");
-    }
-    if(el.classList.contains("timeline-item")){ el.style.setProperty("--i", timelineIdx); timelineIdx++; }
-  });
-  var fadeObserver = new IntersectionObserver(function(entries){
-    entries.forEach(function(entry){
-      if(entry.isIntersecting){
-        entry.target.classList.add("visible");
-        fadeObserver.unobserve(entry.target);
-      }
-    });
-  }, { threshold: 0.08 });
-  fadeEls.forEach(function(el){ fadeObserver.observe(el); });
-  /* FIX: Force fade-in visible when clicking nav anchors */
-  links.forEach(function(a){
-    a.addEventListener("click", function(){
-      var id = a.getAttribute("href").replace("#","");
-      var target = document.getElementById(id);
-      if(!target) return;
-      var children = target.querySelectorAll(".fade-in");
-      children.forEach(function(child){
-        child.classList.add("visible");
-        fadeObserver.unobserve(child);
-      });
-      if(target.classList.contains("fade-in")){
-        target.classList.add("visible");
-        fadeObserver.unobserve(target);
-      }
-      var parent = target.closest(".mission, .conviction, .portfolio, .founder, .contact, .thesis");
-      if(parent){
-        parent.querySelectorAll(".fade-in").forEach(function(child){
-          child.classList.add("visible");
-          fadeObserver.unobserve(child);
-        });
-      }
-    });
-  });
-  /* COUNTER ANIMATION */
-  var metricH3s = document.querySelectorAll(".metric-item h3");
-  var counterDone = false;
-  var counterObserver = new IntersectionObserver(function(entries){
-    entries.forEach(function(entry){
-      if(entry.isIntersecting && !counterDone){
-        counterDone = true;
-        metricH3s.forEach(function(h3){
-          var text = h3.textContent.trim();
-          var match = text.match(/^(\d+)(\+?)$/);
-          if(match){
-            var target = parseInt(match[1]);
-            var suffix = match[2];
-            var start = 0;
-            var duration = 1200;
-            var startTime = null;
-            function animate(ts){
-              if(!startTime) startTime = ts;
-              var progress = Math.min((ts - startTime) / duration, 1);
-              var eased = 1 - Math.pow(1 - progress, 3);
-              h3.textContent = Math.floor(eased * target) + suffix;
-              if(progress < 1) requestAnimationFrame(animate);
-            }
-            h3.textContent = "0" + suffix;
-            requestAnimationFrame(animate);
-          }
-        });
-        counterObserver.disconnect();
-      }
-    });
-  }, { threshold: 0.3 });
-  var metricsSection = document.querySelector(".metrics");
-  if(metricsSection) counterObserver.observe(metricsSection);
-})();
-</script>
-<!-- ANIMATED STARFIELD -->
+
+<!-- STARFIELD -->
 <script>
 (function(){
   var canvas = document.getElementById('starfield');
   if(!canvas) return;
   var ctx = canvas.getContext('2d');
   var dpr = Math.min(window.devicePixelRatio || 1, 2);
-  /* --- MOUSE PARALLAX --- */
   var mouseX = 0.5, mouseY = 0.5;
   var smoothX = 0.5, smoothY = 0.5;
   document.addEventListener('mousemove', function(e){
     mouseX = e.clientX / window.innerWidth;
     mouseY = e.clientY / window.innerHeight;
   });
-
-  /* --- NEBULA COLOR WASH (offscreen canvas) --- */
   var nebulaCanvas = document.createElement('canvas');
   var nebulaCtx = nebulaCanvas.getContext('2d');
   function buildNebula(){
@@ -1074,7 +221,6 @@
       nebulaCtx.fillRect(0, 0, w, h);
     }
   }
-
   function resize(){
     canvas.width = window.innerWidth * dpr;
     canvas.height = window.innerHeight * dpr;
@@ -1083,15 +229,11 @@
   }
   resize();
   window.addEventListener('resize', resize);
-
-  /* --- DEPTH LAYERS: 0=far, 1=mid, 2=near --- */
   var layerConfig = [
     {driftMult: 0.5, parallax: 4, sizeMult: 0.7},
     {driftMult: 1.0, parallax: 10, sizeMult: 1.0},
     {driftMult: 1.8, parallax: 20, sizeMult: 1.3}
   ];
-
-  /* --- BUILD STARS WITH DEPTH --- */
   var STARS = 400;
   var stars = [];
   for(var i = 0; i < STARS; i++){
@@ -1120,13 +262,9 @@
       driftY: (Math.random() - 0.5) * 0.000018 * lc.driftMult,
       glowMult: 4 + Math.random() * 6,
       layer: layer,
-      parallax: lc.parallax,
-      feature: false
+      parallax: lc.parallax
     });
   }
-
-
-  /* --- SHOOTING STARS --- */
   var shooters = [];
   var lastShootTime = 0;
   function spawnShooter(){
@@ -1143,356 +281,103 @@
       b: 255
     });
   }
-
   function animate(time){
     requestAnimationFrame(animate);
     var t = time * 0.001;
     var w = window.innerWidth, h = window.innerHeight;
     ctx.clearRect(0, 0, w, h);
-
-    /* Smooth mouse interpolation */
     smoothX += (mouseX - smoothX) * 0.04;
     smoothY += (mouseY - smoothY) * 0.04;
     var offsetBaseX = (smoothX - 0.5);
     var offsetBaseY = (smoothY - 0.5);
-
-    /* Draw nebula wash */
-    var nebulaShiftX = offsetBaseX * -8;
-    var nebulaShiftY = offsetBaseY * -8;
     var nebulaPulse = 0.7 + 0.3 * Math.sin(t * 0.08);
     ctx.globalAlpha = nebulaPulse;
-    ctx.drawImage(nebulaCanvas, nebulaShiftX, nebulaShiftY, w, h);
+    ctx.drawImage(nebulaCanvas, offsetBaseX * -8, offsetBaseY * -8, w, h);
     ctx.globalAlpha = 1.0;
-
-    /* Draw stars with depth + parallax */
     for(var i = 0; i < stars.length; i++){
       var s = stars[i];
-      s.x += s.driftX;
-      s.y += s.driftY;
-      if(s.x < -0.05) s.x = 1.05;
-      if(s.x > 1.05) s.x = -0.05;
-      if(s.y < -0.05) s.y = 1.05;
-      if(s.y > 1.05) s.y = -0.05;
+      s.x += s.driftX; s.y += s.driftY;
+      if(s.x < -0.05) s.x = 1.05; if(s.x > 1.05) s.x = -0.05;
+      if(s.y < -0.05) s.y = 1.05; if(s.y > 1.05) s.y = -0.05;
       var twinkle = 0.4 + 0.6 * (0.5 + 0.5 * Math.sin(t * s.speed + s.phase));
       var glowPulse = 0.5 + 0.5 * Math.sin(t * s.speed * 0.6 + s.phase * 1.5);
       var px = s.x * w + offsetBaseX * s.parallax;
       var py = s.y * h + offsetBaseY * s.parallax;
-      var glowRadius = s.size * s.glowMult;
-
-      /* Feature stars get enhanced glow */
-      if(s.feature){
-        var fGlowAlpha = twinkle * 0.14 * glowPulse;
-        if(fGlowAlpha > 0.005){
-          var fGrad = ctx.createRadialGradient(px, py, 0, px, py, glowRadius);
-          fGrad.addColorStop(0, 'rgba(' + s.r + ',' + s.g + ',' + s.b + ',' + fGlowAlpha + ')');
-          fGrad.addColorStop(0.25, 'rgba(' + s.r + ',' + s.g + ',' + s.b + ',' + (fGlowAlpha * 0.6) + ')');
-          fGrad.addColorStop(0.6, 'rgba(' + s.r + ',' + s.g + ',' + s.b + ',' + (fGlowAlpha * 0.2) + ')');
-          fGrad.addColorStop(1, 'rgba(0,0,0,0)');
-          ctx.fillStyle = fGrad;
-          ctx.fillRect(px - glowRadius, py - glowRadius, glowRadius * 2, glowRadius * 2);
-        }
-        /* Inner bright core for feature stars */
-        ctx.beginPath();
-        ctx.arc(px, py, s.size * 0.4, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(255,255,255,' + (twinkle * 0.45).toFixed(3) + ')';
-        ctx.fill();
-      } else {
-        var glowAlpha = twinkle * 0.12 * glowPulse;
-        if(glowAlpha > 0.01){
-          var grad = ctx.createRadialGradient(px, py, 0, px, py, glowRadius);
-          grad.addColorStop(0, 'rgba(' + s.r + ',' + s.g + ',' + s.b + ',' + glowAlpha + ')');
-          grad.addColorStop(0.4, 'rgba(' + s.r + ',' + s.g + ',' + s.b + ',' + (glowAlpha * 0.4) + ')');
-          grad.addColorStop(1, 'rgba(0,0,0,0)');
-          ctx.fillStyle = grad;
-          ctx.fillRect(px - glowRadius, py - glowRadius, glowRadius * 2, glowRadius * 2);
-        }
+      var glowAlpha = twinkle * 0.12 * glowPulse;
+      if(glowAlpha > 0.01){
+        var grad = ctx.createRadialGradient(px, py, 0, px, py, s.size * s.glowMult);
+        grad.addColorStop(0, 'rgba(' + s.r + ',' + s.g + ',' + s.b + ',' + glowAlpha + ')');
+        grad.addColorStop(0.4, 'rgba(' + s.r + ',' + s.g + ',' + s.b + ',' + (glowAlpha * 0.4) + ')');
+        grad.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = grad;
+        var gr = s.size * s.glowMult;
+        ctx.fillRect(px - gr, py - gr, gr * 2, gr * 2);
       }
       ctx.beginPath();
       ctx.arc(px, py, s.size, 0, Math.PI * 2);
       ctx.fillStyle = 'rgba(' + s.r + ',' + s.g + ',' + s.b + ',' + (twinkle * 0.9) + ')';
       ctx.fill();
     }
-
-    /* Spawn shooting stars every 8-12 seconds */
-    if(t - lastShootTime > 8 + Math.random() * 4){
-      spawnShooter();
-      lastShootTime = t;
-    }
-
-    /* Draw shooting stars */
+    if(t - lastShootTime > 8 + Math.random() * 4){ spawnShooter(); lastShootTime = t; }
     for(var j = shooters.length - 1; j >= 0; j--){
       var sh = shooters[j];
       sh.life += 0.016;
       if(sh.life > sh.maxLife){ shooters.splice(j, 1); continue; }
-
       var progress = sh.life / sh.maxLife;
       var fade = progress < 0.15 ? progress / 0.15 : (1.0 - progress) / 0.85;
       fade = Math.max(0, Math.min(1, fade));
-
       var headX = (sh.x + Math.cos(sh.angle) * sh.speed * sh.life) * w;
       var headY = (sh.y + Math.sin(sh.angle) * sh.speed * sh.life) * h;
       var tailX = headX - Math.cos(sh.angle) * sh.len * fade;
       var tailY = headY - Math.sin(sh.angle) * sh.len * fade;
-
-      /* Gradient trail */
       var sg = ctx.createLinearGradient(tailX, tailY, headX, headY);
       sg.addColorStop(0, 'rgba(' + sh.r + ',' + sh.g + ',' + sh.b + ',0)');
       sg.addColorStop(0.6, 'rgba(' + sh.r + ',' + sh.g + ',' + sh.b + ',' + (fade * 0.35).toFixed(3) + ')');
       sg.addColorStop(1, 'rgba(255,255,255,' + (fade * 0.9).toFixed(3) + ')');
-      ctx.strokeStyle = sg;
-      ctx.lineWidth = 1.5;
-      ctx.beginPath();
-      ctx.moveTo(tailX, tailY);
-      ctx.lineTo(headX, headY);
-      ctx.stroke();
-
-      /* Bright head dot */
-      ctx.beginPath();
-      ctx.arc(headX, headY, 1.8, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(255,255,255,' + (fade * 0.85).toFixed(3) + ')';
-      ctx.fill();
-
-      /* Soft glow around head */
+      ctx.strokeStyle = sg; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(tailX, tailY); ctx.lineTo(headX, headY); ctx.stroke();
+      ctx.beginPath(); ctx.arc(headX, headY, 1.8, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255,255,255,' + (fade * 0.85).toFixed(3) + ')'; ctx.fill();
       var hGrad = ctx.createRadialGradient(headX, headY, 0, headX, headY, 6);
       hGrad.addColorStop(0, 'rgba(255,255,255,' + (fade * 0.3).toFixed(3) + ')');
       hGrad.addColorStop(1, 'rgba(255,255,255,0)');
-      ctx.fillStyle = hGrad;
-      ctx.fillRect(headX - 6, headY - 6, 12, 12);
+      ctx.fillStyle = hGrad; ctx.fillRect(headX - 6, headY - 6, 12, 12);
     }
   }
   requestAnimationFrame(animate);
 })();
 </script>
-<!-- Ada Chat Widget -->
-<style>
-  #ada-bubble {
-    position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 9999;
-    width: 52px; height: 52px; border-radius: 50%;
-    background: rgba(12, 14, 21, 0.15); border: 1px solid rgba(255,255,255,0.06);
-    cursor: pointer; display: flex; align-items: center; justify-content: center;
-    box-shadow: none;
-    transition: transform 0.2s, background 0.2s;
-    animation: ada-pulse 1.5s ease-out 2s 3;
-  }
-  @keyframes ada-pulse {
-    0% { box-shadow: 0 0 0 0 rgba(74, 125, 255, 0.4); }
-    70% { box-shadow: 0 0 0 18px rgba(74, 125, 255, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(74, 125, 255, 0); }
-  }
-  #ada-bubble:hover { transform: scale(1.08); background: rgba(12, 14, 21, 0.35); border-color: rgba(255,255,255,0.12); }
-  #ada-bubble svg { width: 24px; height: 24px; fill: var(--accent-blue); }
-  #ada-bubble.open { display: none; }
 
-  #ada-panel {
-    position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 9999;
-    width: 380px; height: 520px; max-height: 80vh;
-    border-radius: 16px; overflow: hidden;
-    background: rgba(8, 9, 14, 0.95);
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(74, 125, 255, 0.15);
-    box-shadow: 0 8px 40px rgba(0,0,0,0.5);
-    display: none; flex-direction: column;
-    font-family: var(--font-body);
-  }
-  #ada-panel.open { display: flex; }
-
-  #ada-header {
-    padding: 0.75rem 1rem;
-    border-bottom: 1px solid rgba(255,255,255,0.06);
-    display: flex; align-items: center; justify-content: space-between;
-    flex-shrink: 0;
-  }
-  #ada-header .ada-title {
-    font-family: var(--font-display); font-weight: 300; font-size: 0.85rem;
-    letter-spacing: 0.15em; color: var(--text-primary);
-  }
-  #ada-header .ada-controls { display: flex; gap: 0.4rem; }
-  #ada-header button {
-    background: none; border: none; cursor: pointer; padding: 0.3rem;
-    border-radius: 6px; display: flex; align-items: center; justify-content: center;
-  }
-  #ada-header button:hover { background: rgba(255,255,255,0.08); }
-  #ada-header button svg { width: 16px; height: 16px; stroke: var(--text-muted); fill: none; stroke-width: 1.8; }
-
-  #ada-messages {
-    flex: 1; overflow-y: auto; padding: 1rem;
-    display: flex; flex-direction: column; gap: 0.75rem;
-    scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.06) transparent;
-  }
-  .ada-msg {
-    max-width: 92%; padding: 0.65rem 0.85rem; border-radius: 12px;
-    font-size: 0.82rem; line-height: 1.6; font-weight: 300;
-    white-space: pre-wrap; word-wrap: break-word; position: relative;
-  }
-  .ada-msg.bot {
-    align-self: flex-start; color: var(--text-secondary);
-    background: rgba(255,255,255,0.04);
-  }
-  .ada-msg.user {
-    align-self: flex-end; color: #fff;
-    background: rgba(74, 125, 255, 0.15);
-  }
-  .ada-msg.typing { color: var(--text-muted); font-style: italic; }
-  .ada-msg.typing .dots span { animation: ada-blink 1.4s infinite both; font-style: normal; }
-  .ada-msg.typing .dots span:nth-child(2) { animation-delay: 0.2s; }
-  .ada-msg.typing .dots span:nth-child(3) { animation-delay: 0.4s; }
-  @keyframes ada-blink { 0%,80%,100% { opacity: 0.2; } 40% { opacity: 1; } }
-
-  .ada-copy-btn {
-    display: block; margin-top: 0.4rem; margin-left: auto;
-    background: none; border: none; cursor: pointer; padding: 0.2rem;
-    border-radius: 4px; opacity: 0; transition: opacity 0.2s;
-  }
-  .ada-copy-btn:hover { background: rgba(255,255,255,0.1); }
-  .ada-copy-btn svg { width: 13px; height: 13px; stroke: var(--text-muted); fill: none; stroke-width: 1.8; }
-  .ada-copy-btn.copied svg { stroke: var(--accent-blue); }
-  .ada-msg.bot:hover .ada-copy-btn { opacity: 1; }
-
-  #ada-input-area {
-    padding: 0.6rem 0.75rem;
-    border-top: 1px solid rgba(255,255,255,0.06);
-    flex-shrink: 0;
-  }
-  .ada-input-wrap {
-    display: flex; align-items: center;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.08); border-radius: 10px;
-    padding: 0.25rem 0.25rem 0.25rem 0.75rem;
-    transition: border-color 0.3s;
-  }
-  .ada-input-wrap:focus-within { border-color: rgba(74, 125, 255, 0.35); }
-  #ada-input {
-    flex: 1; background: transparent; border: none;
-    padding: 0.35rem 0; color: #fff; font-family: var(--font-body);
-    font-size: 16px; font-weight: 300; outline: none;
-  }
-  #ada-input::placeholder { color: var(--text-muted); }
-  #ada-send {
-    background: var(--accent-blue); border: none; border-radius: 7px;
-    width: 32px; height: 32px; min-width: 32px; display: flex;
-    align-items: center; justify-content: center; cursor: pointer;
-    margin-left: 0.4rem; transition: background 0.2s;
-  }
-  #ada-send:hover { background: #6b9aff; }
-  #ada-send:disabled { background: #2a3a5a; cursor: not-allowed; }
-  #ada-send svg { width: 14px; height: 14px; fill: white; }
-
-  #ada-footer {
-    padding: 0.35rem 0.75rem; text-align: center;
-    font-size: 0.55rem; color: var(--text-muted); font-weight: 300;
-    border-top: 1px solid rgba(255,255,255,0.03);
-  }
-
-  @media (max-width: 600px) {
-    #ada-panel {
-      width: calc(100vw - 1.5rem); right: 0.75rem; bottom: 0.75rem;
-      height: 60vh;
-    }
-    #ada-bubble { bottom: 1rem; right: 1rem; }
-    .ada-copy-btn { opacity: 0.5; }
-  }
-</style>
-
-<!-- Chat bubble -->
-<button id="ada-bubble" aria-label="Chat with Ada">
-  <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-</button>
-
-<!-- Chat panel -->
-<div id="ada-panel">
-  <div id="ada-header">
-    <span class="ada-title">Ada</span>
-    <div class="ada-controls">
-      <button id="ada-popout" title="Open in new tab">
-        <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
-      </button>
-      <button id="ada-close" title="Close">
-        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-      </button>
-    </div>
-  </div>
-  <div id="ada-messages">
-    <div class="ada-msg bot">Welcome to Spacefaring Ventures. I'm Ada, an AI assistant providing general information about our firm. How can I help you today?</div>
-  </div>
-  <div id="ada-input-area">
-    <div class="ada-input-wrap">
-      <input type="text" id="ada-input" placeholder="Ask a question..." maxlength="500" autocomplete="off">
-      <button id="ada-send" aria-label="Send">
-        <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
-      </button>
-    </div>
-  </div>
-  <div id="ada-footer">General information only. Not financial, investment, legal, or tax advice.</div>
-</div>
-
+<!-- APP LOGIC -->
 <script>
 (function(){
   var API = 'https://sv-agent.ir-def.workers.dev';
-  var bubble = document.getElementById('ada-bubble');
-  var panel = document.getElementById('ada-panel');
-  var closeBtn = document.getElementById('ada-close');
-  var popoutBtn = document.getElementById('ada-popout');
-  var input = document.getElementById('ada-input');
-  var sendBtn = document.getElementById('ada-send');
-  var msgArea = document.getElementById('ada-messages');
-  var history = [];
-  var MAX_HISTORY = 20;
+  var questionInput = document.getElementById('question');
+  var sendBtn = document.getElementById('send-btn');
+  var messages = document.getElementById('messages');
+  var conversationHistory = [];
+  var MAX_HISTORY = 20; // Keep last 20 messages (10 exchanges) to stay within token limits
 
-  function toggle(open) {
-    if (open) {
-      panel.classList.add('open');
-      bubble.classList.add('open');
-      input.focus();
-    } else {
-      panel.classList.remove('open');
-      bubble.classList.remove('open');
-    }
+  function renderText(text) {
+    var s = text;
+    s = s.replace(/\*\*(.+?)\*\*/g, '$1');
+    s = s.replace(/__(.+?)__/g, '$1');
+    s = s.replace(/\*(.+?)\*/g, '$1');
+    s = s.replace(/_(.+?)_/g, '$1');
+    s = s.replace(/^#{1,6}\s+/gm, '');
+    s = s.replace(/^[\-\*]\s+/gm, '- ');
+    return s;
   }
 
-  bubble.addEventListener('click', function() { toggle(true); });
-  closeBtn.addEventListener('click', function() { toggle(false); });
-  popoutBtn.addEventListener('click', function() {
-    var msgNodes = msgArea.querySelectorAll('.ada-msg');
-    var msgs = [];
-    for (var i = 0; i < msgNodes.length; i++) {
-      var node = msgNodes[i];
-      if (node.classList.contains('typing')) continue;
-      var role = node.classList.contains('user') ? 'user' : 'bot';
-      var text = node.textContent.replace(/\s*Copy$/, '').trim();
-      if (text) msgs.push({ role: role, text: text });
-    }
-    try {
-      localStorage.setItem('ada-popout-history', JSON.stringify(history));
-      localStorage.setItem('ada-popout-messages', JSON.stringify(msgs));
-      localStorage.setItem('ada-popout-ts', Date.now().toString());
-    } catch(e) {}
-    window.open('https://spacefaring.ventures/ada', '_blank');
-    toggle(false);
-  });
-  var adaOpen = document.getElementById('ada-open');
-  if (adaOpen) {
-    adaOpen.addEventListener('click', function(e) {
-      e.preventDefault();
-      toggle(true);
-      document.getElementById('ada-panel').scrollIntoView({ behavior: 'smooth', block: 'end' });
-    });
-  }
-
-  function renderText(t) {
-    return t.replace(/\*\*(.+?)\*\*/g,'$1').replace(/__(.+?)__/g,'$1')
-            .replace(/\*(.+?)\*/g,'$1').replace(/_(.+?)_/g,'$1')
-            .replace(/^#{1,6}\s+/gm,'').replace(/^[\-\*]\s+/gm,'- ');
-  }
-
-  function makeCopy(text) {
-    var clipIcon = '<svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>';
+  function makeCopyBtn(textToCopy) {
+    var clipIcon = '<svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>';
     var checkIcon = '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>';
     var btn = document.createElement('button');
-    btn.className = 'ada-copy-btn';
+    btn.className = 'copy-btn';
     btn.title = 'Copy';
     btn.innerHTML = clipIcon;
     btn.addEventListener('click', function() {
-      navigator.clipboard.writeText(text).then(function() {
+      navigator.clipboard.writeText(textToCopy).then(function() {
         btn.innerHTML = checkIcon;
         btn.classList.add('copied');
         btn.title = 'Copied';
@@ -1504,55 +389,85 @@
 
   function addMsg(text, type) {
     var div = document.createElement('div');
-    div.className = 'ada-msg ' + type;
+    div.className = 'msg ' + type;
     if (type === 'bot typing') {
       div.innerHTML = '<span class="dots"><span>.</span><span>.</span><span>.</span></span>';
     } else {
-      var clean = renderText(text);
-      div.textContent = clean;
-      if (type === 'bot') div.appendChild(makeCopy(clean));
+      var rendered = renderText(text);
+      div.textContent = rendered;
+      if (type === 'bot') {
+        div.appendChild(makeCopyBtn(rendered));
+      }
     }
-    msgArea.appendChild(div);
-    msgArea.scrollTop = msgArea.scrollHeight;
+    messages.appendChild(div);
+    messages.scrollTop = messages.scrollHeight;
     return div;
   }
 
+  // Restore conversation from widget pop-out
+  (function restorePopout() {
+    try {
+      var ts = localStorage.getItem('ada-popout-ts');
+      if (!ts || (Date.now() - parseInt(ts, 10)) > 30000) return;
+      var savedHistory = localStorage.getItem('ada-popout-history');
+      var savedMsgs = localStorage.getItem('ada-popout-messages');
+      // Clear immediately so a page refresh starts fresh
+      localStorage.removeItem('ada-popout-history');
+      localStorage.removeItem('ada-popout-messages');
+      localStorage.removeItem('ada-popout-ts');
+      if (!savedHistory || !savedMsgs) return;
+      var histArr = JSON.parse(savedHistory);
+      var msgArr = JSON.parse(savedMsgs);
+      if (!histArr.length) return;
+      conversationHistory = histArr;
+      if (conversationHistory.length > MAX_HISTORY) {
+        conversationHistory = conversationHistory.slice(-MAX_HISTORY);
+      }
+      // Replace default welcome message with saved conversation
+      messages.innerHTML = '';
+      for (var i = 0; i < msgArr.length; i++) {
+        var m = msgArr[i];
+        addMsg(m.text, m.role === 'user' ? 'user' : 'bot');
+      }
+    } catch(e) {}
+  })();
+
   async function send() {
-    var q = input.value.trim();
+    var q = questionInput.value.trim();
     if (!q) return;
-    input.value = '';
+    questionInput.value = '';
     sendBtn.disabled = true;
     addMsg(q, 'user');
-    history.push({ role: 'user', content: q });
-    if (history.length > MAX_HISTORY) history = history.slice(-MAX_HISTORY);
+    conversationHistory.push({ role: 'user', content: q });
+    // Trim history to last N messages
+    if (conversationHistory.length > MAX_HISTORY) {
+      conversationHistory = conversationHistory.slice(-MAX_HISTORY);
+    }
     var typing = addMsg('', 'bot typing');
     try {
       var res = await fetch(API + '/ask', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ question: q, history: history })
+        body: JSON.stringify({ question: q, history: conversationHistory })
       });
       var data = await res.json();
       typing.remove();
       var answer = data.error || data.answer;
       addMsg(answer, 'bot');
-      history.push({ role: 'assistant', content: answer });
-    } catch(e) {
+      conversationHistory.push({ role: 'assistant', content: answer });
+    } catch (err) {
       typing.remove();
       addMsg('Connection interrupted. Please try again.', 'bot');
     }
     sendBtn.disabled = false;
-    input.focus();
+    questionInput.focus();
   }
 
   sendBtn.addEventListener('click', send);
-  input.addEventListener('keydown', function(e) {
+  questionInput.addEventListener('keydown', function(e){
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
   });
 })();
 </script>
-<!-- End Ada Chat Widget -->
-
-<!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "05cbb98e680e435db4f68bf690c5e4fc"}'></script><!-- End Cloudflare Web Analytics -->
 </body>
 </html>
