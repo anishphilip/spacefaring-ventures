@@ -12,7 +12,7 @@
 <meta charset="UTF-8">
 <meta name="copyright" content="Copyright 2026 Spacefaring Ventures LLC. All rights reserved.">
 <meta name="author" content="Spacefaring Ventures LLC">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Ada - Spacefaring Ventures AI Assistant</title>
 <meta name="description" content="Spacefaring Ventures AI Assistant">
 <meta name="robots" content="noindex, nofollow">
@@ -41,6 +41,11 @@
   #chat-screen {
     display: flex; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     flex-direction: column; z-index: 10;
+    overflow: hidden;
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
   }
   header {
     position: relative; z-index: 10;
@@ -72,11 +77,25 @@
     max-width: 720px; padding: 0.85rem 1.1rem; border-radius: 14px;
     font-size: 0.9rem; line-height: 1.65; font-weight: 300; color: var(--text-secondary);
     white-space: pre-wrap; word-wrap: break-word;
+    position: relative;
   }
   .msg.bot {
     align-self: flex-start;
     background: transparent;
     border: none;
+  }
+  .copy-btn {
+    position: absolute; top: 0.5rem; right: 0.5rem;
+    background: none; border: none; cursor: pointer;
+    opacity: 0; transition: opacity 0.2s;
+    padding: 0.3rem; border-radius: 6px;
+  }
+  .copy-btn:hover, .copy-btn:active { background: rgba(255,255,255,0.08); }
+  .copy-btn svg { width: 15px; height: 15px; fill: none; stroke: var(--text-muted); stroke-width: 1.8; }
+  .copy-btn.copied svg { stroke: var(--accent-blue); }
+  .msg.bot:hover .copy-btn { opacity: 1; }
+  @media (max-width: 600px) {
+    .copy-btn { opacity: 0.5; }
   }
   .msg.user {
     align-self: flex-end;
@@ -131,8 +150,10 @@
   }
   @media (max-width: 600px) {
     #messages { padding: 1rem; }
-    #input-area { padding: 0.75rem 1rem; }
-    header { padding: 1rem; }
+    #input-area { padding: 0.75rem 0.75rem; gap: 0.5rem; }
+    #send-btn { width: 40px; height: 40px; min-width: 40px; }
+    header { padding: 0.75rem 1rem; }
+    footer { padding: 0.5rem 1rem; font-size: 0.58rem; }
   }
 </style>
 </head>
