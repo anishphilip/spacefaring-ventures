@@ -1452,7 +1452,22 @@
   bubble.addEventListener('click', function() { toggle(true); });
   closeBtn.addEventListener('click', function() { toggle(false); });
   popoutBtn.addEventListener('click', function() {
-    window.open('https://spacefaring.ventures/ada', '_blank');
+    var msgNodes = msgArea.querySelectorAll('.ada-msg');
+    var msgs = [];
+    for (var i = 0; i < msgNodes.length; i++) {
+      var node = msgNodes[i];
+      if (node.classList.contains('typing')) continue;
+      var role = node.classList.contains('user') ? 'user' : 'bot';
+      var text = node.textContent.replace(/\s*Copy$/, '').trim();
+      if (text) msgs.push({ role: role, text: text });
+    }
+    try {
+      localStorage.setItem('ada-popout-history', JSON.stringify(history));
+      localStorage.setItem('ada-popout-messages', JSON.stringify(msgs));
+      localStorage.setItem('ada-popout-ts', Date.now().toString());
+    } catch(e) {}
+    window.open(window.location.origin + '/ada', '_blank');
+    toggle(false);
   });
   var adaOpen = document.getElementById('ada-open');
   if (adaOpen) {
