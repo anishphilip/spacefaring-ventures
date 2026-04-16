@@ -333,19 +333,16 @@ How can I help you today?</div>
   var questionInput = document.getElementById('question');
   var sendBtn = document.getElementById('send-btn');
   var messages = document.getElementById('messages');
+  var conversationHistory = [];
+  var MAX_HISTORY = 20; // Keep last 20 messages (10 exchanges) to stay within token limits
 
   function renderText(text) {
-    // Strip markdown formatting that Claude might include
     var s = text;
-    // Bold: **text** or __text__
     s = s.replace(/\*\*(.+?)\*\*/g, '$1');
     s = s.replace(/__(.+?)__/g, '$1');
-    // Italic: *text* or _text_
     s = s.replace(/\*(.+?)\*/g, '$1');
     s = s.replace(/_(.+?)_/g, '$1');
-    // Headers: ### text
     s = s.replace(/^#{1,6}\s+/gm, '');
-    // Bullet points: - item or * item at start of line
     s = s.replace(/^[\-\*]\s+/gm, '- ');
     return s;
   }
@@ -369,16 +366,23 @@ How can I help you today?</div>
     questionInput.value = '';
     sendBtn.disabled = true;
     addMsg(q, 'user');
+    conversationHistory.push({ role: 'user', content: q });
+    // Trim history to last N messages
+    if (conversationHistory.length > MAX_HISTORY) {
+      conversationHistory = conversationHistory.slice(-MAX_HISTORY);
+    }
     var typing = addMsg('', 'bot typing');
     try {
       var res = await fetch(API + '/ask', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({question: q})
+        body: JSON.stringify({ question: q, history: conversationHistory })
       });
       var data = await res.json();
       typing.remove();
-      addMsg(data.error || data.answer, 'bot');
+      var answer = data.error || data.answer;
+      addMsg(answer, 'bot');
+      conversationHistory.push({ role: 'assistant', content: answer });
     } catch (err) {
       typing.remove();
       addMsg('Connection interrupted. Please try again.', 'bot');
