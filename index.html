@@ -1,3 +1,4 @@
+
 <!--
   Copyright (c) 2026 Spacefaring Ventures LLC. All rights reserved.
   This source code is the proprietary and confidential property of Spacefaring Ventures LLC.
@@ -889,6 +890,7 @@
         <a href="mailto:ir@spacefaring.ventures">ir@spacefaring.ventures</a>
       </div>
     </div>
+    <p class="contact-note">Have a quick question? <a href="#" id="ada-open" style="color: var(--accent-blue); text-decoration: none; border-bottom: 1px solid rgba(74,125,255,0.3);">Chat with Ada</a>, our AI assistant.</p>
     <p class="contact-note">Spacefaring Ventures LLC is a SEC Exempt Reporting Adviser (CRD# 342085)</p>
   </div>
 </section>
@@ -1251,6 +1253,259 @@
   requestAnimationFrame(animate);
 })();
 </script>
+<!-- Ada Chat Widget -->
+<style>
+  #ada-bubble {
+    position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 9999;
+    width: 52px; height: 52px; border-radius: 50%;
+    background: rgba(12, 14, 21, 0.15); border: 1px solid rgba(255,255,255,0.06);
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    box-shadow: none;
+    transition: transform 0.2s, background 0.2s;
+  }
+  #ada-bubble:hover { transform: scale(1.08); background: rgba(12, 14, 21, 0.35); border-color: rgba(255,255,255,0.12); }
+  #ada-bubble svg { width: 24px; height: 24px; fill: var(--accent-blue); }
+  #ada-bubble.open { display: none; }
+
+  #ada-panel {
+    position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 9999;
+    width: 380px; height: 520px; max-height: 80vh;
+    border-radius: 16px; overflow: hidden;
+    background: rgba(8, 9, 14, 0.95);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(74, 125, 255, 0.15);
+    box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+    display: none; flex-direction: column;
+    font-family: var(--font-body);
+  }
+  #ada-panel.open { display: flex; }
+
+  #ada-header {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    display: flex; align-items: center; justify-content: space-between;
+    flex-shrink: 0;
+  }
+  #ada-header .ada-title {
+    font-family: var(--font-display); font-weight: 300; font-size: 0.85rem;
+    letter-spacing: 0.15em; color: var(--text-primary);
+  }
+  #ada-header .ada-controls { display: flex; gap: 0.4rem; }
+  #ada-header button {
+    background: none; border: none; cursor: pointer; padding: 0.3rem;
+    border-radius: 6px; display: flex; align-items: center; justify-content: center;
+  }
+  #ada-header button:hover { background: rgba(255,255,255,0.08); }
+  #ada-header button svg { width: 16px; height: 16px; stroke: var(--text-muted); fill: none; stroke-width: 1.8; }
+
+  #ada-messages {
+    flex: 1; overflow-y: auto; padding: 1rem;
+    display: flex; flex-direction: column; gap: 0.75rem;
+    scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.06) transparent;
+  }
+  .ada-msg {
+    max-width: 92%; padding: 0.65rem 0.85rem; border-radius: 12px;
+    font-size: 0.82rem; line-height: 1.6; font-weight: 300;
+    white-space: pre-wrap; word-wrap: break-word; position: relative;
+  }
+  .ada-msg.bot {
+    align-self: flex-start; color: var(--text-secondary);
+    background: rgba(255,255,255,0.04);
+  }
+  .ada-msg.user {
+    align-self: flex-end; color: #fff;
+    background: rgba(74, 125, 255, 0.15);
+  }
+  .ada-msg.typing { color: var(--text-muted); font-style: italic; }
+  .ada-msg.typing .dots span { animation: ada-blink 1.4s infinite both; font-style: normal; }
+  .ada-msg.typing .dots span:nth-child(2) { animation-delay: 0.2s; }
+  .ada-msg.typing .dots span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes ada-blink { 0%,80%,100% { opacity: 0.2; } 40% { opacity: 1; } }
+
+  .ada-copy-btn {
+    display: block; margin-top: 0.4rem; margin-left: auto;
+    background: none; border: none; cursor: pointer; padding: 0.2rem;
+    border-radius: 4px; opacity: 0; transition: opacity 0.2s;
+  }
+  .ada-copy-btn:hover { background: rgba(255,255,255,0.1); }
+  .ada-copy-btn svg { width: 13px; height: 13px; stroke: var(--text-muted); fill: none; stroke-width: 1.8; }
+  .ada-copy-btn.copied svg { stroke: var(--accent-blue); }
+  .ada-msg.bot:hover .ada-copy-btn { opacity: 1; }
+
+  #ada-input-area {
+    padding: 0.6rem 0.75rem;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    display: flex; gap: 0.5rem; align-items: center;
+    flex-shrink: 0;
+  }
+  #ada-input {
+    flex: 1; background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08); border-radius: 8px;
+    padding: 0.55rem 0.75rem; color: #fff; font-family: var(--font-body);
+    font-size: 16px; font-weight: 300; outline: none;
+  }
+  #ada-input::placeholder { color: var(--text-muted); }
+  #ada-input:focus { border-color: rgba(74, 125, 255, 0.35); }
+  #ada-send {
+    background: var(--accent-blue); border: none; border-radius: 8px;
+    width: 36px; height: 36px; min-width: 36px; display: flex;
+    align-items: center; justify-content: center; cursor: pointer;
+  }
+  #ada-send:hover { background: #6b9aff; }
+  #ada-send:disabled { background: #2a3a5a; cursor: not-allowed; }
+  #ada-send svg { width: 15px; height: 15px; fill: white; }
+
+  #ada-footer {
+    padding: 0.35rem 0.75rem; text-align: center;
+    font-size: 0.55rem; color: var(--text-muted); font-weight: 300;
+    border-top: 1px solid rgba(255,255,255,0.03);
+  }
+
+  @media (max-width: 600px) {
+    #ada-panel {
+      width: calc(100vw - 1.5rem); right: 0.75rem; bottom: 0.75rem;
+      height: 60vh;
+    }
+    #ada-bubble { bottom: 1rem; right: 1rem; }
+    .ada-copy-btn { opacity: 0.5; }
+  }
+</style>
+
+<!-- Chat bubble -->
+<button id="ada-bubble" aria-label="Chat with Ada">
+  <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+</button>
+
+<!-- Chat panel -->
+<div id="ada-panel">
+  <div id="ada-header">
+    <span class="ada-title">Ada</span>
+    <div class="ada-controls">
+      <button id="ada-popout" title="Open in new tab">
+        <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+      </button>
+      <button id="ada-close" title="Close">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+    </div>
+  </div>
+  <div id="ada-messages">
+    <div class="ada-msg bot">Welcome to Spacefaring Ventures. I'm Ada, an AI assistant providing general information about our firm. How can I help you today?</div>
+  </div>
+  <div id="ada-input-area">
+    <input type="text" id="ada-input" placeholder="Ask a question..." maxlength="500" autocomplete="off">
+    <button id="ada-send" aria-label="Send">
+      <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+    </button>
+  </div>
+  <div id="ada-footer">General information only. Not financial, investment, legal, or tax advice.</div>
+</div>
+
+<script>
+(function(){
+  var API = 'https://sv-agent.ir-def.workers.dev';
+  var bubble = document.getElementById('ada-bubble');
+  var panel = document.getElementById('ada-panel');
+  var closeBtn = document.getElementById('ada-close');
+  var popoutBtn = document.getElementById('ada-popout');
+  var input = document.getElementById('ada-input');
+  var sendBtn = document.getElementById('ada-send');
+  var msgArea = document.getElementById('ada-messages');
+  var history = [];
+  var MAX_HISTORY = 20;
+
+  function toggle(open) {
+    if (open) {
+      panel.classList.add('open');
+      bubble.classList.add('open');
+      input.focus();
+    } else {
+      panel.classList.remove('open');
+      bubble.classList.remove('open');
+    }
+  }
+
+  bubble.addEventListener('click', function() { toggle(true); });
+  closeBtn.addEventListener('click', function() { toggle(false); });
+  popoutBtn.addEventListener('click', function() {
+    window.open('/ada', '_blank');
+  });
+
+  function renderText(t) {
+    return t.replace(/\*\*(.+?)\*\*/g,'$1').replace(/__(.+?)__/g,'$1')
+            .replace(/\*(.+?)\*/g,'$1').replace(/_(.+?)_/g,'$1')
+            .replace(/^#{1,6}\s+/gm,'').replace(/^[\-\*]\s+/gm,'- ');
+  }
+
+  function makeCopy(text) {
+    var clipIcon = '<svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>';
+    var checkIcon = '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+    var btn = document.createElement('button');
+    btn.className = 'ada-copy-btn';
+    btn.title = 'Copy';
+    btn.innerHTML = clipIcon;
+    btn.addEventListener('click', function() {
+      navigator.clipboard.writeText(text).then(function() {
+        btn.innerHTML = checkIcon;
+        btn.classList.add('copied');
+        btn.title = 'Copied';
+        setTimeout(function() { btn.innerHTML = clipIcon; btn.classList.remove('copied'); btn.title = 'Copy'; }, 1500);
+      });
+    });
+    return btn;
+  }
+
+  function addMsg(text, type) {
+    var div = document.createElement('div');
+    div.className = 'ada-msg ' + type;
+    if (type === 'bot typing') {
+      div.innerHTML = '<span class="dots"><span>.</span><span>.</span><span>.</span></span>';
+    } else {
+      var clean = renderText(text);
+      div.textContent = clean;
+      if (type === 'bot') div.appendChild(makeCopy(clean));
+    }
+    msgArea.appendChild(div);
+    msgArea.scrollTop = msgArea.scrollHeight;
+    return div;
+  }
+
+  async function send() {
+    var q = input.value.trim();
+    if (!q) return;
+    input.value = '';
+    sendBtn.disabled = true;
+    addMsg(q, 'user');
+    history.push({ role: 'user', content: q });
+    if (history.length > MAX_HISTORY) history = history.slice(-MAX_HISTORY);
+    var typing = addMsg('', 'bot typing');
+    try {
+      var res = await fetch(API + '/ask', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ question: q, history: history })
+      });
+      var data = await res.json();
+      typing.remove();
+      var answer = data.error || data.answer;
+      addMsg(answer, 'bot');
+      history.push({ role: 'assistant', content: answer });
+    } catch(e) {
+      typing.remove();
+      addMsg('Connection interrupted. Please try again.', 'bot');
+    }
+    sendBtn.disabled = false;
+    input.focus();
+  }
+
+  sendBtn.addEventListener('click', send);
+  input.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
+  });
+})();
+</script>
+<!-- End Ada Chat Widget -->
+
 <!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "05cbb98e680e435db4f68bf690c5e4fc"}'></script><!-- End Cloudflare Web Analytics -->
 </body>
 </html>
