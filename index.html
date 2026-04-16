@@ -591,6 +591,11 @@
   @media (max-width: 600px) {
     .contact-paths { grid-template-columns: 1fr; gap: 1.25rem; }
   }
+  .ada-card {
+    margin: 2rem auto 0;
+    max-width: 340px;
+    text-align: left;
+  }
   .contact-note {
     margin-top: 2rem;
     font-family: var(--font-body);
@@ -890,7 +895,11 @@
         <a href="mailto:ir@spacefaring.ventures">ir@spacefaring.ventures</a>
       </div>
     </div>
-    <p class="contact-note">Have a quick question? <a href="#" id="ada-open" style="color: var(--accent-blue); text-decoration: none; border-bottom: 1px solid rgba(74,125,255,0.3);">Chat with Ada</a>, our AI assistant.</p>
+    <div class="contact-path ada-card">
+      <h4>Quick Questions</h4>
+      <p>Our AI assistant can answer most frequently asked questions about the firm and our funds.</p>
+      <a href="#" id="ada-open">Chat with Ada</a>
+    </div>
     <p class="contact-note">Spacefaring Ventures LLC is a SEC Exempt Reporting Adviser (CRD# 342085)</p>
   </div>
 </section>
@@ -1266,6 +1275,12 @@
   #ada-bubble:hover { transform: scale(1.08); background: rgba(12, 14, 21, 0.35); border-color: rgba(255,255,255,0.12); }
   #ada-bubble svg { width: 24px; height: 24px; fill: var(--accent-blue); }
   #ada-bubble.open { display: none; }
+  @keyframes ada-pulse {
+    0% { box-shadow: 0 0 0 0 rgba(74, 125, 255, 0.25); }
+    70% { box-shadow: 0 0 0 12px rgba(74, 125, 255, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(74, 125, 255, 0); }
+  }
+  #ada-bubble { animation: ada-pulse 2s ease-out 3s 1; }
 
   #ada-panel {
     position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 9999;
@@ -1428,8 +1443,16 @@
   bubble.addEventListener('click', function() { toggle(true); });
   closeBtn.addEventListener('click', function() { toggle(false); });
   popoutBtn.addEventListener('click', function() {
-    window.open('/ada', '_blank');
+    window.open('https://www.spacefaring.ventures/ada', '_blank');
   });
+  var adaOpen = document.getElementById('ada-open');
+  if (adaOpen) {
+    adaOpen.addEventListener('click', function(e) {
+      e.preventDefault();
+      toggle(true);
+      document.getElementById('ada-panel').scrollIntoView({ behavior: 'smooth', block: 'end' });
+    });
+  }
 
   function renderText(t) {
     return t.replace(/\*\*(.+?)\*\*/g,'$1').replace(/__(.+?)__/g,'$1')
