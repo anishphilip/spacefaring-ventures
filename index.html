@@ -1311,11 +1311,14 @@
     cursor: pointer; display: flex; align-items: center; justify-content: center;
     box-shadow: none;
     transition: transform 0.2s, background 0.2s;
-    animation: ada-pulse 1.5s ease-out 2s 3;
+    animation: ada-pulse 2.4s ease-in-out 1.5s infinite;
+  }
+  #ada-bubble.ada-engaged {
+    animation: none;
   }
   @keyframes ada-pulse {
-    0% { box-shadow: 0 0 0 0 rgba(74, 125, 255, 0.4); }
-    70% { box-shadow: 0 0 0 18px rgba(74, 125, 255, 0); }
+    0% { box-shadow: 0 0 0 0 rgba(74, 125, 255, 0.35); }
+    70% { box-shadow: 0 0 0 16px rgba(74, 125, 255, 0); }
     100% { box-shadow: 0 0 0 0 rgba(74, 125, 255, 0); }
   }
   #ada-bubble:hover { transform: scale(1.08); background: rgba(12, 14, 21, 0.35); border-color: rgba(255,255,255,0.12); }
@@ -1488,7 +1491,7 @@
     }
   }
 
-  bubble.addEventListener('click', function() { toggle(true); });
+  bubble.addEventListener('click', function() { bubble.classList.add('ada-engaged'); toggle(true); });
   closeBtn.addEventListener('click', function() { toggle(false); });
   popoutBtn.addEventListener('click', function() {
     var msgNodes = msgArea.querySelectorAll('.ada-msg');
