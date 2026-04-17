@@ -1,3 +1,4 @@
+
 <!--
   Copyright (c) 2026 Spacefaring Ventures LLC. All rights reserved.
   This source code is the proprietary and confidential property of Spacefaring Ventures LLC.
@@ -68,9 +69,21 @@
     z-index: 100;
     padding: 1.5rem 4rem;
     display: flex; justify-content: space-between; align-items: center;
-    background: rgba(5,5,7,0.88);
-    backdrop-filter: blur(24px);
-    border-bottom: 1px solid var(--border);
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border-bottom: 1px solid transparent;
+    transition: background 0.35s ease, border-color 0.35s ease, backdrop-filter 0.35s ease, -webkit-backdrop-filter 0.35s ease, transform 0.4s ease;
+    will-change: transform;
+  }
+  nav.nav-scrolled {
+    background: rgba(5,5,7,0.22);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  nav.nav-hidden {
+    transform: translateY(-110%);
   }
   .nav-logo {
     font-family: var(--font-display);
@@ -939,6 +952,31 @@
   }
   window.addEventListener("scroll", update, {passive:true});
   update();
+  /* FLOATING NAV: transparent at top, frosted when scrolled, hide on scroll down, show on scroll up */
+  var navEl = document.querySelector("nav");
+  var lastNavY = window.scrollY;
+  var navThreshold = 80;
+  function updateNavVisibility(){
+    if(!navEl) return;
+    var currentY = window.scrollY;
+    var navLinksEl = document.querySelector(".nav-links");
+    var menuOpen = navLinksEl && navLinksEl.classList.contains("open");
+    if(currentY > navThreshold){
+      navEl.classList.add("nav-scrolled");
+    } else {
+      navEl.classList.remove("nav-scrolled");
+    }
+    if(menuOpen || currentY <= navThreshold){
+      navEl.classList.remove("nav-hidden");
+    } else if(currentY > lastNavY + 4){
+      navEl.classList.add("nav-hidden");
+    } else if(currentY < lastNavY - 4){
+      navEl.classList.remove("nav-hidden");
+    }
+    lastNavY = currentY;
+  }
+  window.addEventListener("scroll", updateNavVisibility, {passive:true});
+  updateNavVisibility();
   /* HAMBURGER MENU */
   var hamburger = document.querySelector(".hamburger");
   var navLinks = document.querySelector(".nav-links");
@@ -946,6 +984,7 @@
     hamburger.addEventListener("click", function(){
       hamburger.classList.toggle("active");
       navLinks.classList.toggle("open");
+      if(navEl){ navEl.classList.remove("nav-hidden"); }
     });
     navLinks.querySelectorAll("a").forEach(function(a){
       a.addEventListener("click", function(){
