@@ -68,9 +68,18 @@
     z-index: 100;
     padding: 1.5rem 4rem;
     display: flex; justify-content: space-between; align-items: center;
-    background: rgba(5,5,7,0.88);
-    backdrop-filter: blur(24px);
-    border-bottom: 1px solid var(--border);
+    background: transparent !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border: none !important;
+    border-bottom: none !important;
+    box-shadow: none !important;
+    transition: transform 0.4s ease;
+    will-change: transform;
+    pointer-events: auto;
+  }
+  nav.nav-hidden {
+    transform: translateY(-110%);
   }
   .nav-logo {
     font-family: var(--font-display);
@@ -939,6 +948,26 @@
   }
   window.addEventListener("scroll", update, {passive:true});
   update();
+  /* FLOATING NAV: fully transparent at all times; hide on scroll down, show on scroll up */
+  var navEl = document.querySelector("nav");
+  var lastNavY = window.scrollY;
+  var navThreshold = 80;
+  function updateNavVisibility(){
+    if(!navEl) return;
+    var currentY = window.scrollY;
+    var navLinksEl = document.querySelector(".nav-links");
+    var menuOpen = navLinksEl && navLinksEl.classList.contains("open");
+    if(menuOpen || currentY <= navThreshold){
+      navEl.classList.remove("nav-hidden");
+    } else if(currentY > lastNavY + 4){
+      navEl.classList.add("nav-hidden");
+    } else if(currentY < lastNavY - 4){
+      navEl.classList.remove("nav-hidden");
+    }
+    lastNavY = currentY;
+  }
+  window.addEventListener("scroll", updateNavVisibility, {passive:true});
+  updateNavVisibility();
   /* HAMBURGER MENU */
   var hamburger = document.querySelector(".hamburger");
   var navLinks = document.querySelector(".nav-links");
@@ -946,6 +975,7 @@
     hamburger.addEventListener("click", function(){
       hamburger.classList.toggle("active");
       navLinks.classList.toggle("open");
+      if(navEl){ navEl.classList.remove("nav-hidden"); }
     });
     navLinks.querySelectorAll("a").forEach(function(a){
       a.addEventListener("click", function(){
