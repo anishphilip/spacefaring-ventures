@@ -117,25 +117,10 @@
     0%, 80%, 100% { opacity: 0.2; }
     40% { opacity: 1; }
   }
-  /* Header controls - voice toggle + badge */
+  /* Header controls */
   .header-right {
     display: flex; align-items: center; gap: 0.6rem;
   }
-  #voice-toggle-btn {
-    background: none; border: none; cursor: pointer;
-    padding: 0.4rem; border-radius: 8px;
-    display: flex; align-items: center; justify-content: center;
-    transition: background 0.15s;
-  }
-  #voice-toggle-btn:hover { background: rgba(255,255,255,0.08); }
-  #voice-toggle-btn svg {
-    width: 18px; height: 18px;
-    stroke: var(--text-muted); fill: none;
-    stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
-    transition: stroke 0.15s;
-  }
-  #voice-toggle-btn.on { background: rgba(74, 125, 255, 0.12); }
-  #voice-toggle-btn.on svg { stroke: var(--accent-blue); }
 
   /* Input area - single unified wrapper, mirrors the mini widget */
   #input-area {
@@ -256,9 +241,6 @@
   <header>
     <a href="https://www.spacefaring.ventures/" style="text-decoration:none;color:inherit"><h1>Spacefaring Ventures</h1></a>
     <div class="header-right">
-      <button id="voice-toggle-btn" title="Toggle spoken replies" aria-pressed="false" aria-label="Toggle spoken replies">
-        <svg viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
-      </button>
       <div class="badge">Ada</div>
     </div>
   </header>
@@ -451,7 +433,6 @@
   var sendBtn = document.getElementById('send-btn');
   var messages = document.getElementById('messages');
   var micBtn = document.getElementById('mic-btn');
-  var voiceToggleBtn = document.getElementById('voice-toggle-btn');
   var conversationHistory = [];
   var MAX_HISTORY = 20; // Keep last 20 messages (10 exchanges) to stay within token limits
 
@@ -591,7 +572,7 @@
       var botDiv = addMsg(answer, 'bot');
       conversationHistory.push({ role: 'assistant', content: answer });
       // Auto-speak when voice toggle is on OR when the question came from voice input
-      if (voiceEnabled || opts.fromVoice) {
+      if (opts.fromVoice) {
         var speakBtn = botDiv.querySelector('.speak-btn');
         speak(answer, speakBtn);
       }
@@ -613,13 +594,10 @@
    * - Mic records via MediaRecorder, converts to 16-bit PCM WAV (xAI's byte
    *   sniffer is strict), uploads to /voice/stt with a vocabulary prompt hint,
    *   normalizes phonetic mishearings of "Spacefaring Ventures", auto-sends.
-   * - Header toggle enables spoken replies (xAI TTS) for all bot turns.
-   *   Mic-initiated turns are always spoken, regardless of toggle state.
-   * - Per-message speak button plays any bot reply on demand.
+   * - Mic-initiated turns always get a spoken reply via xAI TTS.
+   * - Typed turns are silent by default; per-message play buttons let the
+   *   user hear any bot reply on demand.
    * ====================================================================== */
-  var voiceEnabled = false;
-  try { voiceEnabled = localStorage.getItem('ada-voice-enabled') === '1'; } catch(e) {}
-
   var recorder = null, recStream = null, recChunks = [], recMime = '';
   var currentAudio = null, currentAudioBtn = null, currentAudioUrl = null;
   var currentReader = null, currentAbort = null;
@@ -676,28 +654,6 @@
       var decoded = await ac.decodeAudioData(ab.slice(0));
       return audioBufferToWav(decoded);
     } finally { try { await ac.close(); } catch(e) {} }
-  }
-
-  function syncVoiceToggle() {
-    if (!voiceToggleBtn) return;
-    if (voiceEnabled) {
-      voiceToggleBtn.classList.add('on');
-      voiceToggleBtn.setAttribute('aria-pressed', 'true');
-      voiceToggleBtn.title = 'Spoken replies: on';
-    } else {
-      voiceToggleBtn.classList.remove('on');
-      voiceToggleBtn.setAttribute('aria-pressed', 'false');
-      voiceToggleBtn.title = 'Spoken replies: off';
-    }
-  }
-  if (voiceToggleBtn) {
-    syncVoiceToggle();
-    voiceToggleBtn.addEventListener('click', function() {
-      voiceEnabled = !voiceEnabled;
-      try { localStorage.setItem('ada-voice-enabled', voiceEnabled ? '1' : '0'); } catch(e) {}
-      syncVoiceToggle();
-      if (!voiceEnabled) stopSpeaking();
-    });
   }
 
   function setMicState(state) {
