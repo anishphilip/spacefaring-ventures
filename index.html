@@ -1,3 +1,4 @@
+
 <!--
   Copyright (c) 2026 Spacefaring Ventures LLC. All rights reserved.
   This source code is the proprietary and confidential property of Spacefaring Ventures LLC.
@@ -1852,7 +1853,7 @@
       // .play() inside a user-gesture handler. The mic tap IS such a gesture -
       // use it to prime a persistent <audio> element so the TTS reply (which
       // arrives seconds later, after the gesture has expired) can still play.
-      unlockPersistentAudio();
+      unlockPersistentMedia();
       if (recorder && recorder.state === 'recording') stopRecording();
       else startRecording();
     });
@@ -1870,34 +1871,94 @@
    * ====================================================================== */
   var persistentAudio = null;
   var persistentAudioUnlocked = false;
+  var persistentVideo = null;
+  var persistentVideoUnlocked = false;
   var SILENT_MP3 = 'data:audio/mpeg;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA//uQxAAAAAAAAAAAAAAAAAAAAAAASW5mbwAAAA8AAAAEAAABIADAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDA////////////////////////////////////////////AAAAAExhdmM1OC4xMwAAAAAAAAAAAAAAACQCgAAAAAAAAAEgQ2I1hgAAAAAAAAAAAAAAAAAAAAAAAP/7kMQAA8AAAaQAAAAgAAA0gAAABExBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV';
+
+  function isIOS() {
+    if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) return true;
+    // iPadOS >=13 reports as MacIntel but exposes touch
+    return navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
+  }
+
+  function isMobile() {
+    return isIOS() || /Android/i.test(navigator.userAgent);
+  }
+
+  function ensurePersistentAudio() {
+    if (!persistentAudio) {
+      persistentAudio = new Audio();
+      persistentAudio.preload = 'auto';
+      persistentAudio.playsInline = true;
+      persistentAudio.setAttribute('playsinline', '');
+    }
+    return persistentAudio;
+  }
+
+  function ensurePersistentVideo() {
+    if (!persistentVideo) {
+      persistentVideo = document.createElement('video');
+      persistentVideo.preload = 'auto';
+      persistentVideo.playsInline = true;
+      persistentVideo.setAttribute('playsinline', '');
+      persistentVideo.setAttribute('webkit-playsinline', '');
+      persistentVideo.setAttribute('aria-hidden', 'true');
+      persistentVideo.style.position = 'fixed';
+      persistentVideo.style.width = '1px';
+      persistentVideo.style.height = '1px';
+      persistentVideo.style.opacity = '0';
+      persistentVideo.style.pointerEvents = 'none';
+      persistentVideo.style.left = '-9999px';
+      persistentVideo.style.top = '-9999px';
+      document.body.appendChild(persistentVideo);
+    }
+    return persistentVideo;
+  }
 
   function unlockPersistentAudio() {
     if (persistentAudioUnlocked) return;
     try {
-      if (!persistentAudio) {
-        persistentAudio = new Audio();
-        persistentAudio.preload = 'auto';
-        persistentAudio.playsInline = true;
-        persistentAudio.setAttribute('playsinline', '');
-      }
-      persistentAudio.src = SILENT_MP3;
-      var p = persistentAudio.play();
+      var a = ensurePersistentAudio();
+      a.src = SILENT_MP3;
+      var p = a.play();
       if (p && typeof p.then === 'function') {
         p.then(function() {
           persistentAudioUnlocked = true;
-          try { persistentAudio.pause(); } catch(e) {}
-          try { persistentAudio.currentTime = 0; } catch(e) {}
-        }).catch(function() { /* gesture rejected - element still usable later */ });
+          try { a.pause(); } catch(e) {}
+          try { a.currentTime = 0; } catch(e) {}
+        }).catch(function() {});
       } else {
         persistentAudioUnlocked = true;
-        try { persistentAudio.pause(); } catch(e) {}
+        try { a.pause(); } catch(e) {}
       }
     } catch(e) {}
   }
 
-  function isMobile() {
-    return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  function unlockPersistentVideo() {
+    if (persistentVideoUnlocked) return;
+    try {
+      var v = ensurePersistentVideo();
+      v.src = SILENT_MP3;
+      var p = v.play();
+      if (p && typeof p.then === 'function') {
+        p.then(function() {
+          persistentVideoUnlocked = true;
+          try { v.pause(); } catch(e) {}
+          try { v.currentTime = 0; } catch(e) {}
+        }).catch(function() {});
+      } else {
+        persistentVideoUnlocked = true;
+        try { v.pause(); } catch(e) {}
+      }
+    } catch(e) {}
+  }
+
+  function unlockPersistentMedia() {
+    // Must run synchronously inside a user gesture. Unlock both elements up
+    // front so later playback paths (audio for buffered, video for MSE on iOS)
+    // both work after the gesture expires.
+    unlockPersistentAudio();
+    if (isIOS()) unlockPersistentVideo();
   }
 
   function stopSpeaking() {
@@ -1915,18 +1976,22 @@
   }
 
   function canStreamMp3() {
-    // Force buffered playback on mobile: iOS browsers report audio/mpeg as
-    // "supported" by MediaSource but MSE only plays through <video> on iOS,
-    // so attaching a MediaSource URL to <audio> fails silently. All iOS
-    // browsers (Safari, Chrome, Firefox) share the WebKit engine so this
-    // affects all of them. Mobile clips are short enough that buffered
-    // playback starts near-instantly anyway.
-    if (isMobile()) return false;
+    // On iOS, MSE audio/mpeg works on <video> but NOT on <audio>. We still
+    // want streaming (it starts ~instantly on first chunk instead of waiting
+    // for the whole MP3 to finish), so return true on iOS and route playback
+    // through the persistent <video> element below.
     try {
       return typeof MediaSource !== 'undefined'
         && typeof MediaSource.isTypeSupported === 'function'
         && MediaSource.isTypeSupported('audio/mpeg');
     } catch(e) { return false; }
+  }
+
+  // Pick the gesture-unlocked media element appropriate for the platform.
+  // iOS uses <video> (MSE-compatible there); everyone else uses <audio>.
+  function getPlaybackElement() {
+    if (isIOS()) return ensurePersistentVideo();
+    return ensurePersistentAudio();
   }
 
   async function speak(text, btn) {
@@ -1958,33 +2023,31 @@
   async function playBuffered(response) {
     var blob = await response.blob();
     currentAudioUrl = URL.createObjectURL(blob);
-    // Reuse the persistent, gesture-unlocked audio element when available so
-    // play() works on iOS/mobile even after the mic-tap gesture has expired.
-    var audio;
-    if (persistentAudio) {
-      audio = persistentAudio;
-      try { audio.pause(); } catch(e) {}
-      audio.src = currentAudioUrl;
-    } else {
-      audio = new Audio(currentAudioUrl);
-      audio.playsInline = true;
-      audio.setAttribute('playsinline', '');
-    }
-    currentAudio = audio;
-    audio.onended = function() { stopSpeaking(); };
-    audio.onerror = function() { stopSpeaking(); };
-    try { await audio.play(); } catch(e) { /* autoplay blocked */ stopSpeaking(); }
+    // Reuse the gesture-unlocked element so play() works on mobile even after
+    // the mic-tap gesture has expired. On iOS that element is a <video>, on
+    // desktop/Android it's an <audio>.
+    var media = getPlaybackElement();
+    try { media.pause(); } catch(e) {}
+    media.src = currentAudioUrl;
+    currentAudio = media;
+    media.onended = function() { stopSpeaking(); };
+    media.onerror = function() { stopSpeaking(); };
+    try { await media.play(); } catch(e) { stopSpeaking(); }
   }
 
   function playStreaming(response) {
     return new Promise(function(resolve) {
       var ms = new MediaSource();
       currentAudioUrl = URL.createObjectURL(ms);
-      var audio = new Audio(currentAudioUrl);
-      audio.preload = 'auto';
-      currentAudio = audio;
-      audio.onended = function() { stopSpeaking(); };
-      audio.onerror = function() { stopSpeaking(); };
+      // iOS must use <video> for MSE; audio won't play. Desktop / Android use
+      // <audio>. Both elements are unlocked synchronously on mic-tap so
+      // .play() still works here after the async STT+chat round-trip.
+      var media = getPlaybackElement();
+      try { media.pause(); } catch(e) {}
+      media.src = currentAudioUrl;
+      currentAudio = media;
+      media.onended = function() { stopSpeaking(); };
+      media.onerror = function() { stopSpeaking(); };
       ms.addEventListener('sourceopen', function onOpen() {
         ms.removeEventListener('sourceopen', onOpen);
         var sb;
@@ -2017,8 +2080,7 @@
           appending = false;
           if (!started) {
             started = true;
-            audio.play().then(function() { resolve(); }).catch(function() {
-              /* autoplay blocked - user can click replay */
+            media.play().then(function() { resolve(); }).catch(function() {
               stopSpeaking(); resolve();
             });
           }
