@@ -922,7 +922,7 @@
 </div>
 <!-- FOOTER -->
 <footer>
-  <p>&copy; 2026 Spacefaring Ventures LLC. All rights reserved.</p>
+  <p>&copy; 2026 Spacefaring Ventures LLC. All rights reserved. | <a href="/privacy.html" style="color: var(--text-muted); text-decoration: none; transition: color 0.3s;" onmouseover="this.style.color='#4a7dff'" onmouseout="this.style.color='var(--text-muted)'">Privacy Policy</a></p>
   <span class="footer-badge">San Francisco Bay Area</span>
 </footer>
 <script>
@@ -1708,8 +1708,10 @@
   // which runs the normal transcribe-and-send flow. The user only has two voice
   // endpoints: tap mic again OR tap send - both produce the same result.
 
-  // Render the welcome message via addMsg so it gets the speak + copy buttons
-  addMsg('Welcome to Spacefaring Ventures. I\u2019m Ada, an AI assistant providing general information about our firm. How can I help you today?', 'bot');
+  // Render the welcome message via addMsg so it gets the speak + copy buttons.
+  // Keep wording in sync with ada-index.html WELCOME_TEXT so both surfaces show
+  // the same financial-advice disclaimer up front.
+  addMsg('Welcome to Spacefaring Ventures. My name is Ada and I\u2019m an AI assistant that provides general information about our firm. Nothing here constitutes financial, investment, or legal advice, and no information provided should be relied upon for investment decisions. For formal inquiries, please email ir@spacefaring.ventures.\n\nHow can I help you today?', 'bot');
 
   /* ========================================================================
    * VOICE INTEGRATION
