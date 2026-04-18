@@ -1,3 +1,4 @@
+
 <!--
   Copyright (c) 2026 Spacefaring Ventures LLC. All rights reserved.
   This source code is the proprietary and confidential property of Spacefaring Ventures LLC.
@@ -227,43 +228,12 @@
 
   <p>Spacefaring Ventures LLC ("we," "us," or "our") operates the website at spacefaring.ventures. This Privacy Policy explains what information is collected when you visit our site, how it is used, and your choices regarding that information. We believe in transparency and minimal data collection.</p>
 
-  <h2>Important - Do Not Share Sensitive Information</h2>
-  <p style="background: rgba(255, 183, 77, 0.06); border-left: 3px solid #ffb74d; padding: 14px 18px; color: var(--text-primary); border-radius: 2px;"><strong>Ada is a public, general-purpose AI assistant. Please do not share any personal, sensitive, confidential, financial, health, legal, or otherwise private information with Ada or through this website.</strong></p>
-  <p>Sensitive information includes (without limitation): email addresses other than ir@spacefaring.ventures, phone numbers, Social Security Numbers or any government identifier, passport or driver's license numbers, bank, brokerage, or credit/debit card numbers, home addresses, dates of birth, medical or health information, diagnoses, legal matters, net worth, income, salary, or any information about third parties who have not consented to your sharing it.</p>
-  <p>For private matters, please contact <a href="mailto:ir@spacefaring.ventures">ir@spacefaring.ventures</a> directly via email instead of using Ada.</p>
-
-  <h3>What We Do to Prevent Inadvertent Disclosure</h3>
-  <p>Even though we ask you not to share sensitive information, we have implemented multiple layers of protection in case you or someone else does so by mistake:</p>
-  <ul>
-    <li><strong>Client-side filtering.</strong> Your browser scans every message before it is sent and blocks submission if it detects common PII patterns (email addresses, phone numbers, Social Security Numbers, card numbers, dates of birth, IP addresses).</li>
-    <li><strong>Server-side filtering.</strong> Our Cloudflare Worker independently re-scans every incoming message for the same patterns and refuses to process messages that contain PII. If PII is detected, the message is not forwarded to Anthropic, xAI, Resend, or any other subprocessor, and it is not written to any log.</li>
-    <li><strong>Model-level refusal.</strong> Ada's system instructions direct her to refuse to acknowledge, repeat, or process personal or sensitive information if any somehow reaches her.</li>
-    <li><strong>Voice transcription filtering.</strong> Voice messages are transcribed by xAI and the resulting text is re-scanned for PII before being displayed or forwarded. If PII is detected, the transcription is discarded and you are asked to try again.</li>
-    <li><strong>Output filtering.</strong> Ada's responses are scanned before being returned so she cannot regurgitate detected PII back to the browser.</li>
-  </ul>
-  <p>These filters rely on pattern matching and are not perfect. They are a safety net, not a substitute for your own judgment about what to share. We cannot guarantee that every piece of sensitive information will be detected before it leaves your browser.</p>
-
-  <h3>Your Responsibility and Release of Liability</h3>
-  <p>By using Ada or this website, you acknowledge and agree that:</p>
-  <ul>
-    <li>You have read the warning above and understand that this is a public, general-purpose AI assistant, not a private or secure channel.</li>
-    <li>You are solely responsible for the content of any message you submit. You agree not to submit personal, sensitive, confidential, or third-party information.</li>
-    <li>You will not submit information about any other person or entity without that person's or entity's explicit consent.</li>
-    <li>If you nonetheless submit personal or sensitive information (whether about yourself or anyone else, and whether intentionally or inadvertently), you do so at your own risk. You release Spacefaring Ventures LLC, its members, managers, employees, contractors, and service providers from any claim, liability, loss, damage, cost, or expense arising out of or related to your submission of such information, to the fullest extent permitted by law.</li>
-    <li>You agree to indemnify and hold harmless Spacefaring Ventures LLC and the parties listed above from any third-party claim arising out of your submission of information about that third party.</li>
-  </ul>
-  <p>Nothing in this section limits any non-waivable rights you may have under applicable law, including rights under the California Consumer Privacy Act (CCPA/CPRA) or the EU General Data Protection Regulation (GDPR). If you believe we have retained information about you and you wish to exercise a statutory right, contact us at <a href="mailto:ir@spacefaring.ventures">ir@spacefaring.ventures</a>.</p>
-
   <h2>Information We Collect</h2>
   <p>We designed this website to collect as little personal information as possible. Here is what our site and its services may process:</p>
 
   <p><strong>Infrastructure logs (Cloudflare).</strong> Our website is delivered through Cloudflare's content delivery network. As part of standard CDN and DNS operations, Cloudflare may temporarily process visitor IP addresses for security, performance optimization, and country-level analytics. Cloudflare discards raw IP addresses after deriving aggregate metrics. This processing is governed by <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener">Cloudflare's Privacy Policy</a>, not ours.</p>
 
   <p><strong>Cloudflare Web Analytics.</strong> We use Cloudflare Web Analytics to understand aggregate visitor traffic (page views, device types, browsers, and country-level geography). This service does not use cookies, does not track individual users across sites, and does not store personally identifiable information. It is designed to be privacy-first and compliant with GDPR, CCPA, and similar regulations by default.</p>
-
-  <p><strong>Ada (AI assistant).</strong> Our website features an AI-powered assistant called Ada that answers general questions about Spacefaring Ventures. We do not intentionally collect any personally identifiable information from visitors through Ada - no IP addresses, no names, no email addresses, and no device identifiers. Messages are actively filtered for common PII patterns (see "Important - Do Not Share Sensitive Information" above) before being processed. When Ada cannot answer a question, the filtered question text and a timestamp are logged so we can improve the information she can share. These logs are intended to contain only the question itself and the time it was asked.</p>
-
-  <p>Ada is powered by Anthropic's language-model API for text responses and xAI's speech-to-text and text-to-speech APIs for voice interactions. When you interact with Ada, your filtered message is sent to these providers for processing. Their handling of this data is governed by <a href="https://www.anthropic.com/privacy" target="_blank" rel="noopener">Anthropic's Privacy Policy</a> and xAI's privacy policy, respectively. We do not intentionally include visitor-identifying information in these API requests.</p>
 
   <h2>Information We Do Not Collect</h2>
   <p>To be clear about what we do not do:</p>
@@ -277,7 +247,7 @@
   </ul>
 
   <h2>How We Use Information</h2>
-  <p>The limited information described above is used solely to operate and improve our website - specifically, to ensure the site loads quickly and securely (via Cloudflare), to understand aggregate traffic patterns (via Cloudflare Web Analytics), and to improve Ada's ability to answer visitor questions (via anonymous question logs).</p>
+  <p>The limited information described above is used solely to operate and improve our website - specifically, to ensure the site loads quickly and securely (via Cloudflare) and to understand aggregate traffic patterns (via Cloudflare Web Analytics).</p>
 
   <h2>Cookies</h2>
   <p>Our website does not set any first-party cookies. Cloudflare may set a minimal technical cookie (such as __cf_bm) for bot detection and security purposes. This is a functional cookie required for site operation, not a tracking cookie. No consent banner is needed because we do not use cookies for analytics or advertising.</p>
@@ -286,16 +256,13 @@
   <p>Our website relies on the following third-party services:</p>
   <ul>
     <li><strong>GitHub Pages</strong> - website hosting</li>
-    <li><strong>Cloudflare</strong> - CDN, DNS, security, Workers (which power Ada's backend), and privacy-first web analytics</li>
-    <li><strong>Anthropic</strong> - AI language model API that powers Ada's text responses</li>
-    <li><strong>xAI</strong> - speech-to-text and text-to-speech APIs that power Ada's voice interface</li>
-    <li><strong>Resend</strong> - transactional email delivery used only to alert our internal team when Ada receives a question it cannot answer</li>
+    <li><strong>Cloudflare</strong> - CDN, DNS, security, and privacy-first web analytics</li>
     <li><strong>Google Fonts</strong> - web font delivery (Outfit and Lato typefaces)</li>
   </ul>
   <p>Each of these services has its own privacy policy governing how it handles data. We encourage you to review their policies if you have concerns.</p>
 
   <h2>Data Retention</h2>
-  <p>Cloudflare Web Analytics data is retained for up to 6 months in aggregate form. Ada's anonymous question logs are retained only as long as needed to improve the knowledge base and are periodically reviewed and purged. We do not maintain any long-term records tied to individual visitors.</p>
+  <p>Cloudflare Web Analytics data is retained for up to 6 months in aggregate form. We do not maintain any long-term records tied to individual visitors.</p>
 
   <h2>Children's Privacy</h2>
   <p>Our website is not directed at individuals under the age of 13, and we do not knowingly collect any personal information from children.</p>
