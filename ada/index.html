@@ -116,32 +116,122 @@
     0%, 80%, 100% { opacity: 0.2; }
     40% { opacity: 1; }
   }
+  /* Header controls - voice toggle + badge */
+  .header-right {
+    display: flex; align-items: center; gap: 0.6rem;
+  }
+  #voice-toggle-btn {
+    background: none; border: none; cursor: pointer;
+    padding: 0.4rem; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s;
+  }
+  #voice-toggle-btn:hover { background: rgba(255,255,255,0.08); }
+  #voice-toggle-btn svg {
+    width: 18px; height: 18px;
+    stroke: var(--text-muted); fill: none;
+    stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
+    transition: stroke 0.15s;
+  }
+  #voice-toggle-btn.on { background: rgba(74, 125, 255, 0.12); }
+  #voice-toggle-btn.on svg { stroke: var(--accent-blue); }
+
+  /* Input area - single unified wrapper, mirrors the mini widget */
   #input-area {
     position: relative; z-index: 10;
     padding: 1rem 2rem 1.2rem;
     border-top: 1px solid var(--border);
-    display: flex; gap: 0.75rem; align-items: center;
     background: rgba(5, 5, 7, 0.88);
     backdrop-filter: blur(24px);
     flex-shrink: 0;
   }
+  .input-wrap {
+    display: flex; align-items: center;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    padding: 0.4rem 0.4rem 0.4rem 1rem;
+    transition: border-color 0.3s;
+    max-width: 860px; margin: 0 auto;
+  }
+  .input-wrap:focus-within { border-color: rgba(74, 125, 255, 0.35); }
   #question {
-    flex: 1; background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.08); border-radius: 10px;
-    padding: 0.75rem 1rem; color: #ffffff; font-family: var(--font-body);
-    font-size: 0.9rem; font-weight: 300; outline: none;
+    flex: 1; min-width: 0;
+    background: transparent; border: none;
+    padding: 0.5rem 0; color: #ffffff;
+    font-family: var(--font-body);
+    font-size: 0.95rem; font-weight: 300; outline: none;
   }
   #question::placeholder { color: var(--text-muted); }
-  #question:focus { border-color: rgba(74, 125, 255, 0.35); }
+
+  #mic-btn {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    width: 38px; height: 38px; min-width: 38px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    margin-right: 0.5rem;
+    transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+    position: relative; flex-shrink: 0;
+  }
+  #mic-btn svg {
+    width: 16px; height: 16px;
+    stroke: var(--text-muted); fill: none;
+    stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round;
+    transition: stroke 0.15s ease;
+  }
+  #mic-btn:hover:not(:disabled) { background: rgba(74, 125, 255, 0.08); border-color: rgba(74, 125, 255, 0.35); }
+  #mic-btn:hover:not(:disabled) svg { stroke: var(--accent-blue); }
+  #mic-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  #mic-btn.recording {
+    background: rgba(255, 97, 115, 0.15);
+    border-color: rgba(255, 97, 115, 0.45);
+    animation: mic-pulse 1.6s ease-in-out infinite;
+  }
+  #mic-btn.recording svg { stroke: #ff6173; }
+  #mic-btn.transcribing { border-color: rgba(74, 125, 255, 0.35); }
+  #mic-btn.transcribing svg {
+    stroke: var(--accent-blue);
+    animation: mic-spin 0.8s linear infinite;
+    transform-origin: 50% 50%;
+  }
+  @keyframes mic-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(255, 97, 115, 0.45); }
+    50%      { box-shadow: 0 0 0 8px rgba(255, 97, 115, 0); }
+  }
+  @keyframes mic-spin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) {
+    #mic-btn.recording { animation: none; }
+    #mic-btn.transcribing svg { animation: none; }
+  }
+
   #send-btn {
     background: var(--accent-blue); border: none; border-radius: 10px;
-    width: 44px; height: 44px; display: flex; align-items: center;
-    justify-content: center; cursor: pointer; transition: background 0.2s;
+    width: 38px; height: 38px; min-width: 38px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    margin-left: 0.5rem;
+    transition: background 0.2s;
     flex-shrink: 0;
   }
   #send-btn:hover { background: #6b9aff; }
   #send-btn:disabled { background: #2a3a5a; cursor: not-allowed; }
-  #send-btn svg { width: 18px; height: 18px; fill: white; }
+  #send-btn svg { width: 16px; height: 16px; fill: white; }
+
+  .speak-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    margin-top: 0.5rem; margin-right: 0.25rem;
+    background: none; border: none; cursor: pointer; padding: 0.25rem;
+    border-radius: 6px; opacity: 0; transition: opacity 0.2s ease;
+    float: left;
+  }
+  .speak-btn:hover { background: rgba(255,255,255,0.08); }
+  .speak-btn svg { width: 14px; height: 14px; stroke: var(--text-muted); fill: none; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+  .speak-btn.playing svg { stroke: var(--accent-blue); }
+  .msg.bot:hover .speak-btn { opacity: 1; }
+  @media (max-width: 600px) { .speak-btn { opacity: 0.5; } }
+
   footer {
     position: relative; z-index: 10;
     padding: 0.5rem 2rem; text-align: center; font-size: 0.62rem;
@@ -151,9 +241,10 @@
   }
   @media (max-width: 600px) {
     #messages { padding: 1rem; }
-    #input-area { padding: 0.75rem 0.75rem; gap: 0.5rem; }
+    #input-area { padding: 0.75rem 0.75rem; }
+    .input-wrap { padding: 0.3rem 0.3rem 0.3rem 0.85rem; border-radius: 12px; }
     #question { font-size: 16px; }
-    #send-btn { width: 40px; height: 40px; min-width: 40px; }
+    #send-btn, #mic-btn { width: 34px; height: 34px; min-width: 34px; }
     header { padding: 0.75rem 1rem; }
     footer { padding: 0.5rem 1rem; font-size: 0.58rem; }
   }
@@ -166,7 +257,12 @@
 <div id="chat-screen">
   <header>
     <a href="https://www.spacefaring.ventures/" style="text-decoration:none;color:inherit"><h1>Spacefaring Ventures</h1></a>
-    <div class="badge">Ada</div>
+    <div class="header-right">
+      <button id="voice-toggle-btn" title="Toggle spoken replies" aria-pressed="false" aria-label="Toggle spoken replies">
+        <svg viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+      </button>
+      <div class="badge">Ada</div>
+    </div>
   </header>
   <div id="messages">
     <div class="msg bot">Welcome to Spacefaring Ventures. My name is Ada and I'm an AI assistant that provides general information about our firm. Nothing here constitutes financial, investment, or legal advice, and no information provided should be relied upon for investment decisions. For formal inquiries, please email ir@spacefaring.ventures.
@@ -174,10 +270,15 @@
 How can I help you today?</div>
   </div>
   <div id="input-area">
-    <input type="text" id="question" placeholder="Ask a question about Spacefaring Ventures..." maxlength="500" autocomplete="off" autofocus>
-    <button id="send-btn" aria-label="Send">
-      <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
-    </button>
+    <div class="input-wrap">
+      <button id="mic-btn" aria-label="Record voice question" title="Voice input">
+        <svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"></rect><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="22"></line></svg>
+      </button>
+      <input type="text" id="question" placeholder="Ask a question about Spacefaring Ventures..." maxlength="500" autocomplete="off" autofocus>
+      <button id="send-btn" aria-label="Send">
+        <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+      </button>
+    </div>
   </div>
   <footer>This AI assistant provides general information only and does not constitute financial, investment, legal, or tax advice. Nothing here is an offer or solicitation to buy or sell securities. For formal inquiries, email ir@spacefaring.ventures.</footer>
 </div>
@@ -355,10 +456,13 @@ How can I help you today?</div>
   var questionInput = document.getElementById('question');
   var sendBtn = document.getElementById('send-btn');
   var messages = document.getElementById('messages');
+  var micBtn = document.getElementById('mic-btn');
+  var voiceToggleBtn = document.getElementById('voice-toggle-btn');
   var conversationHistory = [];
   var MAX_HISTORY = 20; // Keep last 20 messages (10 exchanges) to stay within token limits
 
   function renderText(text) {
+    if (!text) return '';
     var s = text;
     s = s.replace(/\*\*(.+?)\*\*/g, '$1');
     s = s.replace(/__(.+?)__/g, '$1');
@@ -387,6 +491,23 @@ How can I help you today?</div>
     return btn;
   }
 
+  function makeSpeakBtn(text) {
+    var spkIcon = '<svg viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>';
+    var stopIcon = '<svg viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="17" y1="8" x2="22" y2="13"></line><line x1="22" y1="8" x2="17" y2="13"></line></svg>';
+    var btn = document.createElement('button');
+    btn.className = 'speak-btn';
+    btn.title = 'Play';
+    btn.setAttribute('aria-label', 'Play spoken reply');
+    btn.innerHTML = spkIcon;
+    btn.addEventListener('click', function() {
+      if (btn.classList.contains('playing')) stopSpeaking();
+      else speak(text, btn);
+    });
+    btn._reset = function() { btn.innerHTML = spkIcon; btn.classList.remove('playing'); btn.title = 'Play'; };
+    btn._active = function() { btn.innerHTML = stopIcon; btn.classList.add('playing'); btn.title = 'Stop'; };
+    return btn;
+  }
+
   function addMsg(text, type) {
     var div = document.createElement('div');
     div.className = 'msg ' + type;
@@ -396,6 +517,7 @@ How can I help you today?</div>
       var rendered = renderText(text);
       div.textContent = rendered;
       if (type === 'bot') {
+        div.appendChild(makeSpeakBtn(rendered));
         div.appendChild(makeCopyBtn(rendered));
       }
     }
@@ -432,14 +554,14 @@ How can I help you today?</div>
     } catch(e) {}
   })();
 
-  async function send() {
+  async function send(opts) {
+    opts = opts || {};
     var q = questionInput.value.trim();
     if (!q) return;
     questionInput.value = '';
     sendBtn.disabled = true;
     addMsg(q, 'user');
     conversationHistory.push({ role: 'user', content: q });
-    // Trim history to last N messages
     if (conversationHistory.length > MAX_HISTORY) {
       conversationHistory = conversationHistory.slice(-MAX_HISTORY);
     }
@@ -453,8 +575,13 @@ How can I help you today?</div>
       var data = await res.json();
       typing.remove();
       var answer = data.error || data.answer;
-      addMsg(answer, 'bot');
+      var botDiv = addMsg(answer, 'bot');
       conversationHistory.push({ role: 'assistant', content: answer });
+      // Auto-speak when voice toggle is on OR when the question came from voice input
+      if (voiceEnabled || opts.fromVoice) {
+        var speakBtn = botDiv.querySelector('.speak-btn');
+        speak(answer, speakBtn);
+      }
     } catch (err) {
       typing.remove();
       addMsg('Connection interrupted. Please try again.', 'bot');
@@ -463,10 +590,228 @@ How can I help you today?</div>
     questionInput.focus();
   }
 
-  sendBtn.addEventListener('click', send);
+  sendBtn.addEventListener('click', function() { send(); });
   questionInput.addEventListener('keydown', function(e){
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
   });
+
+  /* ========================================================================
+   * VOICE INTEGRATION
+   * - Mic records via MediaRecorder, converts to 16-bit PCM WAV (xAI's byte
+   *   sniffer is strict), uploads to /voice/stt with a vocabulary prompt hint,
+   *   normalizes phonetic mishearings of "Spacefaring Ventures", auto-sends.
+   * - Header toggle enables spoken replies (xAI TTS) for all bot turns.
+   *   Mic-initiated turns are always spoken, regardless of toggle state.
+   * - Per-message speak button plays any bot reply on demand.
+   * ====================================================================== */
+  var voiceEnabled = false;
+  try { voiceEnabled = localStorage.getItem('ada-voice-enabled') === '1'; } catch(e) {}
+
+  var recorder = null, recStream = null, recChunks = [], recMime = '';
+  var currentAudio = null, currentAudioBtn = null, currentAudioUrl = null;
+
+  var STT_PROMPT = 'This is a question for Ada at Spacefaring Ventures, an investment firm focused on space technology. Common vocabulary: Spacefaring Ventures, Fund I, Fund II, Fund III, Anish Philip Chacko, limited partner, general partner, capital call, portfolio company, SpaceX, Rocket Lab, Relativity Space, Stoke Space, K2 Space, ir@spacefaring.ventures, spacefaring.ventures.';
+
+  function normalizeFirmName(text) {
+    if (!text) return text;
+    var rules = [
+      [/\bspace[\s\-]?star[\s\-]?ventures?\b/gi, 'Spacefaring Ventures'],
+      [/\bspace[\s\-]?fair[i]?ng[\s\-]?ventures?\b/gi, 'Spacefaring Ventures'],
+      [/\bspace[\s\-]?faring[\s\-]?ventures?\b/gi, 'Spacefaring Ventures'],
+      [/\bspace[\s\-]?fearing[\s\-]?ventures?\b/gi, 'Spacefaring Ventures'],
+      [/\bspace[\s\-]?sparing[\s\-]?ventures?\b/gi, 'Spacefaring Ventures'],
+      [/\bspace[\s\-]?bearing[\s\-]?ventures?\b/gi, 'Spacefaring Ventures'],
+      [/\bspace[\s\-]?star\b(?=.{0,40}(invest|fund|venture|firm|lp|gp|portfolio))/gi, 'Spacefaring'],
+      [/\bspacestar\b/gi, 'Spacefaring']
+    ];
+    var out = text;
+    for (var i = 0; i < rules.length; i++) out = out.replace(rules[i][0], rules[i][1]);
+    return out;
+  }
+
+  /* Encode an AudioBuffer as 16-bit PCM WAV for xAI STT's strict byte sniffer. */
+  function audioBufferToWav(buffer) {
+    var numCh = buffer.numberOfChannels, sampleRate = buffer.sampleRate, length = buffer.length;
+    var blockAlign = numCh * 2, dataSize = length * blockAlign, totalSize = 44 + dataSize;
+    var ab = new ArrayBuffer(totalSize), view = new DataView(ab);
+    function str(off, s) { for (var i = 0; i < s.length; i++) view.setUint8(off + i, s.charCodeAt(i)); }
+    str(0, 'RIFF'); view.setUint32(4, totalSize - 8, true); str(8, 'WAVE');
+    str(12, 'fmt '); view.setUint32(16, 16, true); view.setUint16(20, 1, true);
+    view.setUint16(22, numCh, true); view.setUint32(24, sampleRate, true);
+    view.setUint32(28, sampleRate * blockAlign, true); view.setUint16(32, blockAlign, true); view.setUint16(34, 16, true);
+    str(36, 'data'); view.setUint32(40, dataSize, true);
+    var chans = [];
+    for (var c = 0; c < numCh; c++) chans.push(buffer.getChannelData(c));
+    var off = 44;
+    for (var i = 0; i < length; i++) {
+      for (var c = 0; c < numCh; c++) {
+        var s = Math.max(-1, Math.min(1, chans[c][i]));
+        view.setInt16(off, s < 0 ? s * 0x8000 : s * 0x7fff, true);
+        off += 2;
+      }
+    }
+    return new Blob([ab], { type: 'audio/wav' });
+  }
+
+  async function convertToWav(blob) {
+    var Ctx = window.AudioContext || window.webkitAudioContext;
+    if (!Ctx) throw new Error('AudioContext not supported');
+    var ac = new Ctx();
+    try {
+      var ab = await blob.arrayBuffer();
+      var decoded = await ac.decodeAudioData(ab.slice(0));
+      return audioBufferToWav(decoded);
+    } finally { try { await ac.close(); } catch(e) {} }
+  }
+
+  function syncVoiceToggle() {
+    if (!voiceToggleBtn) return;
+    if (voiceEnabled) {
+      voiceToggleBtn.classList.add('on');
+      voiceToggleBtn.setAttribute('aria-pressed', 'true');
+      voiceToggleBtn.title = 'Spoken replies: on';
+    } else {
+      voiceToggleBtn.classList.remove('on');
+      voiceToggleBtn.setAttribute('aria-pressed', 'false');
+      voiceToggleBtn.title = 'Spoken replies: off';
+    }
+  }
+  if (voiceToggleBtn) {
+    syncVoiceToggle();
+    voiceToggleBtn.addEventListener('click', function() {
+      voiceEnabled = !voiceEnabled;
+      try { localStorage.setItem('ada-voice-enabled', voiceEnabled ? '1' : '0'); } catch(e) {}
+      syncVoiceToggle();
+      if (!voiceEnabled) stopSpeaking();
+    });
+  }
+
+  function setMicState(state) {
+    if (!micBtn) return;
+    micBtn.classList.remove('recording', 'transcribing');
+    if (state === 'recording' || state === 'transcribing') micBtn.classList.add(state);
+  }
+
+  function cleanupStream() {
+    if (recStream) { recStream.getTracks().forEach(function(t) { t.stop(); }); recStream = null; }
+  }
+
+  async function startRecording() {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || typeof MediaRecorder === 'undefined') {
+      addMsg('Voice input is not supported in this browser.', 'bot');
+      return;
+    }
+    try {
+      stopSpeaking();
+      recStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      var candidates = ['audio/webm;codecs=opus', 'audio/webm', 'audio/ogg;codecs=opus', 'audio/mp4'];
+      recMime = '';
+      for (var i = 0; i < candidates.length; i++) {
+        if (MediaRecorder.isTypeSupported(candidates[i])) { recMime = candidates[i]; break; }
+      }
+      recorder = recMime ? new MediaRecorder(recStream, { mimeType: recMime }) : new MediaRecorder(recStream);
+      recChunks = [];
+      recorder.ondataavailable = function(e) { if (e.data && e.data.size) recChunks.push(e.data); };
+      recorder.onstop = function() {
+        cleanupStream();
+        var blob = new Blob(recChunks, { type: recMime || 'audio/webm' });
+        recChunks = [];
+        transcribeAndSend(blob);
+      };
+      recorder.start();
+      setMicState('recording');
+      questionInput.placeholder = 'Listening...';
+      micBtn.setAttribute('aria-label', 'Stop recording');
+    } catch(err) {
+      cleanupStream();
+      setMicState('idle');
+      questionInput.placeholder = 'Ask a question about Spacefaring Ventures...';
+      if (err && err.name === 'NotAllowedError') {
+        addMsg('Microphone access was blocked. Enable it in your browser settings to use voice.', 'bot');
+      } else {
+        addMsg('Could not access the microphone. Please try again.', 'bot');
+      }
+    }
+  }
+
+  function stopRecording() {
+    if (recorder && recorder.state === 'recording') recorder.stop();
+  }
+
+  async function transcribeAndSend(blob) {
+    setMicState('transcribing');
+    questionInput.placeholder = 'Transcribing...';
+    micBtn.setAttribute('aria-label', 'Transcribing');
+    try {
+      var uploadBlob = blob, filename = 'recording.webm';
+      try { uploadBlob = await convertToWav(blob); filename = 'recording.wav'; } catch(e) {
+        filename = (blob.type.indexOf('mp4') >= 0 ? 'recording.m4a' : (blob.type.indexOf('ogg') >= 0 ? 'recording.ogg' : 'recording.webm'));
+      }
+      var form = new FormData();
+      form.append('file', uploadBlob, filename);
+      form.append('model', 'grok-voice-stt');
+      form.append('language', 'en');
+      form.append('prompt', STT_PROMPT);
+      var r = await fetch(API + '/voice/stt', { method: 'POST', body: form });
+      var j = {};
+      try { j = await r.json(); } catch(e) {}
+      var text = j.text || j.transcript || j.transcription || '';
+      text = normalizeFirmName(text.trim());
+      setMicState('idle');
+      questionInput.placeholder = 'Ask a question about Spacefaring Ventures...';
+      micBtn.setAttribute('aria-label', 'Record voice question');
+      if (!text) {
+        addMsg('I didn\u2019t catch that. Please try again.', 'bot');
+        return;
+      }
+      questionInput.value = text;
+      send({ fromVoice: true });
+    } catch(err) {
+      setMicState('idle');
+      questionInput.placeholder = 'Ask a question about Spacefaring Ventures...';
+      micBtn.setAttribute('aria-label', 'Record voice question');
+      addMsg('Connection interrupted. Please try again.', 'bot');
+    }
+  }
+
+  if (micBtn) {
+    micBtn.addEventListener('click', function() {
+      if (recorder && recorder.state === 'recording') stopRecording();
+      else startRecording();
+    });
+  }
+
+  function stopSpeaking() {
+    if (currentAudio) {
+      try { currentAudio.pause(); } catch(e) {}
+      currentAudio = null;
+    }
+    if (currentAudioBtn && currentAudioBtn._reset) currentAudioBtn._reset();
+    currentAudioBtn = null;
+    if (currentAudioUrl) { try { URL.revokeObjectURL(currentAudioUrl); } catch(e) {} currentAudioUrl = null; }
+  }
+
+  async function speak(text, btn) {
+    if (!text) return;
+    stopSpeaking();
+    if (btn && btn._active) btn._active();
+    currentAudioBtn = btn || null;
+    try {
+      var r = await fetch(API + '/voice/tts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: text.slice(0, 1800), language: 'en' })
+      });
+      if (!r.ok) { stopSpeaking(); return; }
+      var blob = await r.blob();
+      currentAudioUrl = URL.createObjectURL(blob);
+      var audio = new Audio(currentAudioUrl);
+      currentAudio = audio;
+      audio.onended = function() { stopSpeaking(); };
+      audio.onerror = function() { stopSpeaking(); };
+      try { await audio.play(); } catch(e) { /* autoplay blocked - user can click replay */ stopSpeaking(); }
+    } catch(e) { stopSpeaking(); }
+  }
 })();
 </script>
 </body>
