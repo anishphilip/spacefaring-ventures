@@ -1,4 +1,3 @@
-
 <!--
   Copyright (c) 2026 Spacefaring Ventures LLC. All rights reserved.
   This source code is the proprietary and confidential property of Spacefaring Ventures LLC.
@@ -807,7 +806,7 @@
         <h4>SpaceX</h4>
       </div>
       <p>Widely regarded as the world's most valuable private company and the leader in orbital launch. SpaceX has rewritten the economics of space access through reusable rocketry, built the world's largest satellite constellation with Starlink, and is now developing Starship - a fully reusable super heavy-lift vehicle designed for interplanetary transport and establishing a permanent human presence on Mars.</p>
-      <div class="portfolio-meta">Invested since 2021 &middot; Multiple Fund vehicles</div>
+      <div class="portfolio-meta">Invested since 2021 &middot; Multiple fund vehicles</div>
     </div>
     <div class="portfolio-card">
       <div class="portfolio-card-header">
@@ -1432,7 +1431,64 @@
     }
     #ada-bubble { bottom: 1rem; right: 1rem; }
     .ada-copy-btn { opacity: 0.5; }
+    .ada-speak-btn { opacity: 0.5; }
   }
+
+  /* Voice input + output controls */
+  #ada-voice-toggle svg { transition: stroke 0.15s; }
+  #ada-voice-toggle.on { background: rgba(74, 125, 255, 0.1); }
+  #ada-voice-toggle.on svg { stroke: var(--accent-blue); }
+
+  #ada-mic {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 7px;
+    width: 32px; height: 32px; min-width: 32px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    margin-right: 0.35rem;
+    transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+    position: relative; flex-shrink: 0;
+  }
+  #ada-mic svg {
+    width: 14px; height: 14px;
+    stroke: var(--text-muted); fill: none;
+    stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round;
+    transition: stroke 0.15s ease;
+  }
+  #ada-mic:hover:not(:disabled) { background: rgba(74, 125, 255, 0.08); border-color: rgba(74, 125, 255, 0.35); }
+  #ada-mic:hover:not(:disabled) svg { stroke: var(--accent-blue); }
+  #ada-mic:disabled { opacity: 0.4; cursor: not-allowed; }
+  #ada-mic.recording {
+    background: rgba(255, 97, 115, 0.15);
+    border-color: rgba(255, 97, 115, 0.45);
+    animation: ada-mic-pulse 1.6s ease-in-out infinite;
+  }
+  #ada-mic.recording svg { stroke: #ff6173; }
+  #ada-mic.transcribing { border-color: rgba(74, 125, 255, 0.35); }
+  #ada-mic.transcribing svg { stroke: var(--accent-blue); animation: ada-spin 0.8s linear infinite; transform-origin: 50% 50%; }
+  @keyframes ada-mic-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(255, 97, 115, 0.45); }
+    50%      { box-shadow: 0 0 0 6px rgba(255, 97, 115, 0); }
+  }
+  @keyframes ada-spin { to { transform: rotate(360deg); } }
+
+  @media (prefers-reduced-motion: reduce) {
+    #ada-mic.recording { animation: none; }
+    #ada-mic.transcribing svg { animation: none; }
+  }
+
+  .ada-speak-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    margin-top: 0.35rem; margin-right: 0.2rem;
+    background: none; border: none; cursor: pointer; padding: 0.2rem;
+    border-radius: 4px; opacity: 0; transition: opacity 0.2s ease;
+    float: left;
+  }
+  .ada-speak-btn:hover { background: rgba(255,255,255,0.1); }
+  .ada-speak-btn svg { width: 13px; height: 13px; stroke: var(--text-muted); fill: none; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+  .ada-speak-btn.playing svg { stroke: var(--accent-blue); }
+  .ada-msg.bot:hover .ada-speak-btn { opacity: 1; }
 </style>
 
 <!-- Chat bubble -->
@@ -1445,6 +1501,9 @@
   <div id="ada-header">
     <span class="ada-title">Ada</span>
     <div class="ada-controls">
+      <button id="ada-voice-toggle" title="Toggle spoken replies" aria-pressed="false">
+        <svg viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+      </button>
       <button id="ada-popout" title="Open in new tab">
         <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
       </button>
@@ -1458,6 +1517,9 @@
   </div>
   <div id="ada-input-area">
     <div class="ada-input-wrap">
+      <button id="ada-mic" aria-label="Record voice question" title="Voice input">
+        <svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="12" rx="3"></rect><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="22"></line></svg>
+      </button>
       <input type="text" id="ada-input" placeholder="Ask a question..." maxlength="500" autocomplete="off">
       <button id="ada-send" aria-label="Send">
         <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
@@ -1544,6 +1606,25 @@
     return btn;
   }
 
+  function makeSpeak(text) {
+    var spkIcon = '<svg viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>';
+    var stopIcon = '<svg viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="17" y1="8" x2="22" y2="13"></line><line x1="22" y1="8" x2="17" y2="13"></line></svg>';
+    var btn = document.createElement('button');
+    btn.className = 'ada-speak-btn';
+    btn.title = 'Play';
+    btn.innerHTML = spkIcon;
+    btn.addEventListener('click', function() {
+      if (btn.classList.contains('playing')) {
+        stopSpeaking();
+      } else {
+        speak(text, btn);
+      }
+    });
+    btn._reset = function() { btn.innerHTML = spkIcon; btn.classList.remove('playing'); btn.title = 'Play'; };
+    btn._active = function() { btn.innerHTML = stopIcon; btn.classList.add('playing'); btn.title = 'Stop'; };
+    return btn;
+  }
+
   function addMsg(text, type) {
     var div = document.createElement('div');
     div.className = 'ada-msg ' + type;
@@ -1552,14 +1633,18 @@
     } else {
       var clean = renderText(text);
       div.textContent = clean;
-      if (type === 'bot') div.appendChild(makeCopy(clean));
+      if (type === 'bot') {
+        div.appendChild(makeSpeak(clean));
+        div.appendChild(makeCopy(clean));
+      }
     }
     msgArea.appendChild(div);
     msgArea.scrollTop = msgArea.scrollHeight;
     return div;
   }
 
-  async function send() {
+  async function send(opts) {
+    opts = opts || {};
     var q = input.value.trim();
     if (!q) return;
     input.value = '';
@@ -1577,8 +1662,13 @@
       var data = await res.json();
       typing.remove();
       var answer = data.error || data.answer;
-      addMsg(answer, 'bot');
+      var botDiv = addMsg(answer, 'bot');
       history.push({ role: 'assistant', content: answer });
+      // Auto-speak when voice mode is on, OR when the question itself came from voice
+      if (voiceEnabled || opts.fromVoice) {
+        var speakBtn = botDiv.querySelector('.ada-speak-btn');
+        speak(answer, speakBtn);
+      }
     } catch(e) {
       typing.remove();
       addMsg('Connection interrupted. Please try again.', 'bot');
@@ -1587,10 +1677,221 @@
     input.focus();
   }
 
-  sendBtn.addEventListener('click', send);
+  sendBtn.addEventListener('click', function() { send(); });
   input.addEventListener('keydown', function(e) {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
   });
+
+  /* ========================================================================
+   * VOICE INTEGRATION
+   * - Mic button records via MediaRecorder, converts to 16-bit PCM WAV,
+   *   uploads to Worker /voice/stt with a Spacefaring vocabulary prompt
+   *   hint, normalizes phonetic variants of the firm name, auto-sends.
+   * - Toggle in the header enables spoken replies (xAI TTS) for all turns.
+   *   Mic-initiated turns always get a spoken reply, regardless of toggle.
+   * - Per-message replay button lets users hear any bot reply on demand.
+   * ====================================================================== */
+  var micBtn = document.getElementById('ada-mic');
+  var voiceToggleBtn = document.getElementById('ada-voice-toggle');
+  var voiceEnabled = false;
+  try { voiceEnabled = localStorage.getItem('ada-voice-enabled') === '1'; } catch(e) {}
+
+  var recorder = null, recStream = null, recChunks = [], recMime = '';
+  var currentAudio = null, currentAudioBtn = null, currentAudioUrl = null;
+
+  var STT_PROMPT = 'This is a question for Ada at Spacefaring Ventures, an investment firm focused on space technology. Common vocabulary: Spacefaring Ventures, Fund I, Fund II, Fund III, Anish Philip Chacko, limited partner, general partner, capital call, portfolio company, SpaceX, Rocket Lab, Relativity Space, Stoke Space, K2 Space, ir@spacefaring.ventures, spacefaring.ventures.';
+
+  function normalizeFirmName(text) {
+    if (!text) return text;
+    var rules = [
+      [/\bspace[\s\-]?star[\s\-]?ventures?\b/gi, 'Spacefaring Ventures'],
+      [/\bspace[\s\-]?fair[i]?ng[\s\-]?ventures?\b/gi, 'Spacefaring Ventures'],
+      [/\bspace[\s\-]?faring[\s\-]?ventures?\b/gi, 'Spacefaring Ventures'],
+      [/\bspace[\s\-]?fearing[\s\-]?ventures?\b/gi, 'Spacefaring Ventures'],
+      [/\bspace[\s\-]?sparing[\s\-]?ventures?\b/gi, 'Spacefaring Ventures'],
+      [/\bspace[\s\-]?bearing[\s\-]?ventures?\b/gi, 'Spacefaring Ventures'],
+      [/\bspace[\s\-]?star\b(?=.{0,40}(invest|fund|venture|firm|lp|gp|portfolio))/gi, 'Spacefaring'],
+      [/\bspacestar\b/gi, 'Spacefaring']
+    ];
+    var out = text;
+    for (var i = 0; i < rules.length; i++) out = out.replace(rules[i][0], rules[i][1]);
+    return out;
+  }
+
+  /* Encode an AudioBuffer as 16-bit PCM WAV for xAI STT's byte sniffer. */
+  function audioBufferToWav(buffer) {
+    var numCh = buffer.numberOfChannels, sampleRate = buffer.sampleRate, length = buffer.length;
+    var blockAlign = numCh * 2, dataSize = length * blockAlign, totalSize = 44 + dataSize;
+    var ab = new ArrayBuffer(totalSize), view = new DataView(ab);
+    function str(off, s) { for (var i = 0; i < s.length; i++) view.setUint8(off + i, s.charCodeAt(i)); }
+    str(0, 'RIFF'); view.setUint32(4, totalSize - 8, true); str(8, 'WAVE');
+    str(12, 'fmt '); view.setUint32(16, 16, true); view.setUint16(20, 1, true);
+    view.setUint16(22, numCh, true); view.setUint32(24, sampleRate, true);
+    view.setUint32(28, sampleRate * blockAlign, true); view.setUint16(32, blockAlign, true); view.setUint16(34, 16, true);
+    str(36, 'data'); view.setUint32(40, dataSize, true);
+    var chans = [];
+    for (var c = 0; c < numCh; c++) chans.push(buffer.getChannelData(c));
+    var off = 44;
+    for (var i = 0; i < length; i++) {
+      for (var c = 0; c < numCh; c++) {
+        var s = Math.max(-1, Math.min(1, chans[c][i]));
+        view.setInt16(off, s < 0 ? s * 0x8000 : s * 0x7fff, true);
+        off += 2;
+      }
+    }
+    return new Blob([ab], { type: 'audio/wav' });
+  }
+
+  async function convertToWav(blob) {
+    var Ctx = window.AudioContext || window.webkitAudioContext;
+    if (!Ctx) throw new Error('AudioContext not supported');
+    var ac = new Ctx();
+    try {
+      var ab = await blob.arrayBuffer();
+      var decoded = await ac.decodeAudioData(ab.slice(0));
+      return audioBufferToWav(decoded);
+    } finally { try { await ac.close(); } catch(e) {} }
+  }
+
+  function syncVoiceToggle() {
+    if (voiceEnabled) { voiceToggleBtn.classList.add('on'); voiceToggleBtn.setAttribute('aria-pressed', 'true'); voiceToggleBtn.title = 'Spoken replies: on'; }
+    else { voiceToggleBtn.classList.remove('on'); voiceToggleBtn.setAttribute('aria-pressed', 'false'); voiceToggleBtn.title = 'Spoken replies: off'; }
+  }
+  if (voiceToggleBtn) {
+    syncVoiceToggle();
+    voiceToggleBtn.addEventListener('click', function() {
+      voiceEnabled = !voiceEnabled;
+      try { localStorage.setItem('ada-voice-enabled', voiceEnabled ? '1' : '0'); } catch(e) {}
+      syncVoiceToggle();
+      if (!voiceEnabled) stopSpeaking();
+    });
+  }
+
+  function setMicState(state) {
+    micBtn.classList.remove('recording', 'transcribing');
+    if (state === 'recording' || state === 'transcribing') micBtn.classList.add(state);
+  }
+
+  function cleanupStream() {
+    if (recStream) { recStream.getTracks().forEach(function(t) { t.stop(); }); recStream = null; }
+  }
+
+  async function startRecording() {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || typeof MediaRecorder === 'undefined') {
+      addMsg('Voice input is not supported in this browser.', 'bot');
+      return;
+    }
+    try {
+      stopSpeaking();
+      recStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      var candidates = ['audio/webm;codecs=opus', 'audio/webm', 'audio/ogg;codecs=opus', 'audio/mp4'];
+      recMime = '';
+      for (var i = 0; i < candidates.length; i++) {
+        if (MediaRecorder.isTypeSupported(candidates[i])) { recMime = candidates[i]; break; }
+      }
+      recorder = recMime ? new MediaRecorder(recStream, { mimeType: recMime }) : new MediaRecorder(recStream);
+      recChunks = [];
+      recorder.ondataavailable = function(e) { if (e.data && e.data.size) recChunks.push(e.data); };
+      recorder.onstop = function() {
+        cleanupStream();
+        var blob = new Blob(recChunks, { type: recMime || 'audio/webm' });
+        recChunks = [];
+        transcribeAndSend(blob);
+      };
+      recorder.start();
+      setMicState('recording');
+      input.placeholder = 'Listening...';
+      micBtn.setAttribute('aria-label', 'Stop recording');
+    } catch(err) {
+      cleanupStream();
+      setMicState('idle');
+      input.placeholder = 'Ask a question...';
+      if (err && err.name === 'NotAllowedError') {
+        addMsg('Microphone access was blocked. Enable it in your browser settings to use voice.', 'bot');
+      } else {
+        addMsg('Could not access the microphone. Please try again.', 'bot');
+      }
+    }
+  }
+
+  function stopRecording() {
+    if (recorder && recorder.state === 'recording') recorder.stop();
+  }
+
+  async function transcribeAndSend(blob) {
+    setMicState('transcribing');
+    input.placeholder = 'Transcribing...';
+    micBtn.setAttribute('aria-label', 'Transcribing');
+    try {
+      var uploadBlob = blob, filename = 'recording.webm';
+      try { uploadBlob = await convertToWav(blob); filename = 'recording.wav'; } catch(e) {
+        filename = (blob.type.indexOf('mp4') >= 0 ? 'recording.m4a' : (blob.type.indexOf('ogg') >= 0 ? 'recording.ogg' : 'recording.webm'));
+      }
+      var form = new FormData();
+      form.append('file', uploadBlob, filename);
+      form.append('model', 'grok-voice-stt');
+      form.append('language', 'en');
+      form.append('prompt', STT_PROMPT);
+      var r = await fetch(API + '/voice/stt', { method: 'POST', body: form });
+      var j = {};
+      try { j = await r.json(); } catch(e) {}
+      var text = j.text || j.transcript || j.transcription || '';
+      text = normalizeFirmName(text.trim());
+      setMicState('idle');
+      input.placeholder = 'Ask a question...';
+      micBtn.setAttribute('aria-label', 'Record voice question');
+      if (!text) {
+        addMsg('I didn\u2019t catch that. Please try again.', 'bot');
+        return;
+      }
+      input.value = text;
+      send({ fromVoice: true });
+    } catch(err) {
+      setMicState('idle');
+      input.placeholder = 'Ask a question...';
+      micBtn.setAttribute('aria-label', 'Record voice question');
+      addMsg('Connection interrupted. Please try again.', 'bot');
+    }
+  }
+
+  if (micBtn) {
+    micBtn.addEventListener('click', function() {
+      if (recorder && recorder.state === 'recording') stopRecording();
+      else startRecording();
+    });
+  }
+
+  function stopSpeaking() {
+    if (currentAudio) {
+      try { currentAudio.pause(); } catch(e) {}
+      currentAudio = null;
+    }
+    if (currentAudioBtn && currentAudioBtn._reset) currentAudioBtn._reset();
+    currentAudioBtn = null;
+    if (currentAudioUrl) { try { URL.revokeObjectURL(currentAudioUrl); } catch(e) {} currentAudioUrl = null; }
+  }
+
+  async function speak(text, btn) {
+    if (!text) return;
+    stopSpeaking();
+    if (btn && btn._active) btn._active();
+    currentAudioBtn = btn || null;
+    try {
+      var r = await fetch(API + '/voice/tts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: text.slice(0, 1800), language: 'en' })
+      });
+      if (!r.ok) { stopSpeaking(); return; }
+      var blob = await r.blob();
+      currentAudioUrl = URL.createObjectURL(blob);
+      var audio = new Audio(currentAudioUrl);
+      currentAudio = audio;
+      audio.onended = function() { stopSpeaking(); };
+      audio.onerror = function() { stopSpeaking(); };
+      try { await audio.play(); } catch(e) { /* autoplay blocked - user can click replay */ stopSpeaking(); }
+    } catch(e) { stopSpeaking(); }
+  }
 })();
 </script>
 <!-- End Ada Chat Widget -->
