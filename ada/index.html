@@ -1,4 +1,3 @@
-
 <!--
   Copyright (c) 2026 Spacefaring Ventures LLC. All rights reserved.
   This source code is the proprietary and confidential property of Spacefaring Ventures LLC.
@@ -535,7 +534,39 @@
     return div;
   }
 
-  var WELCOME_TEXT = 'Welcome to Spacefaring Ventures. My name is Ada and I\u2019m an AI assistant that provides general information about our firm. Nothing here constitutes financial, investment, or legal advice, and no information provided should be relied upon for investment decisions. For formal inquiries, please email ir@spacefaring.ventures.\n\nHow can I help you today?';
+  var WELCOME_TEXT = 'Welcome to Spacefaring Ventures. My name is Ada and I\u2019m an AI assistant that provides general information about our firm. Nothing here constitutes financial, investment, or legal advice, and no information provided should be relied upon for investment decisions. Please don\u2019t share personal or sensitive information here - this is a public assistant. For formal inquiries, please email ir@spacefaring.ventures.\n\nHow can I help you today?';
+
+  // --------------------------------------------------------------
+  // Client-side PII guard. Mirrors server-side scrubInputPII in
+  // worker.js. Blocks submission locally so sensitive data never
+  // leaves the browser. Server-side scrubber is second layer.
+  // --------------------------------------------------------------
+  var PII_PATTERNS_CLIENT = [
+    { re: /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/g, label: 'an email address',
+      preserve: function(m){ return m.toLowerCase() === 'ir@spacefaring.ventures'; } },
+    { re: /(?:\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b/g, label: 'a phone number' },
+    { re: /\+\d{6,15}\b/g, label: 'a phone number' },
+    { re: /\b\d{3}-\d{2}-\d{4}\b/g, label: 'a Social Security Number' },
+    { re: /\b(?:\d[ -]?){13,19}\b/g, label: 'a card number' },
+    { re: /\b(0?[1-9]|1[0-2])[\/\-.](0?[1-9]|[12]\d|3[01])[\/\-.](19|20)\d{2}\b/g, label: 'a date of birth' },
+    { re: /\b(?:\d{1,3}\.){3}\d{1,3}\b/g, label: 'an IP address' }
+  ];
+
+  function detectPII(text) {
+    var hits = [];
+    PII_PATTERNS_CLIENT.forEach(function(p){
+      var matches = text.match(p.re);
+      if (!matches) return;
+      for (var i = 0; i < matches.length; i++) {
+        if (p.preserve && p.preserve(matches[i])) continue;
+        hits.push(p.label);
+        break;
+      }
+    });
+    var seen = {}, out = [];
+    hits.forEach(function(h){ if (!seen[h]) { seen[h] = true; out.push(h); } });
+    return out;
+  }
 
   // Restore conversation from widget pop-out, or render the welcome message
   (function bootstrapMessages() {
@@ -580,6 +611,16 @@
     }
     var q = questionInput.value.trim();
     if (!q) return;
+    // PII guard - block locally so sensitive info never leaves the browser.
+    var piiHits = detectPII(q);
+    if (piiHits.length) {
+      questionInput.value = '';
+      addMsg(q, 'user');
+      addMsg('For your privacy, please don\u2019t share personal or sensitive information here (I noticed what looks like ' + piiHits.join(', ') + '). This is a public assistant and isn\u2019t the right place for that kind of data. Please remove it and try again, or email ir@spacefaring.ventures directly for private matters.', 'bot');
+      sendBtn.disabled = false;
+      questionInput.focus();
+      return;
+    }
     questionInput.value = '';
     sendBtn.disabled = true;
     addMsg(q, 'user');
@@ -766,6 +807,11 @@
       setMicState('idle');
       questionInput.placeholder = 'Ask a question about Spacefaring Ventures...';
       micBtn.setAttribute('aria-label', 'Record voice question');
+      if (j.piiBlocked) {
+        // Server detected PII in the audio transcription and redacted it.
+        addMsg('For your privacy, please don\u2019t share personal or sensitive information by voice. Try again without that information, or email ir@spacefaring.ventures directly for private matters.', 'bot');
+        return;
+      }
       if (!text) {
         addMsg('I didn\u2019t catch that. Please try again.', 'bot');
         return;
