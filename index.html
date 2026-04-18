@@ -1,4 +1,3 @@
-
 <!--
   Copyright (c) 2026 Spacefaring Ventures LLC. All rights reserved.
   This source code is the proprietary and confidential property of Spacefaring Ventures LLC.
@@ -1600,7 +1599,7 @@
     return btn;
   }
 
-  function makeSpeak(text) {
+  function makeSpeak(text, lang) {
     var playIcon = '<svg viewBox="0 0 24 24"><polygon points="7 4 19 12 7 20"></polygon></svg>';
     var pauseIcon = '<svg viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>';
     var btn = document.createElement('button');
@@ -1608,27 +1607,30 @@
     btn.title = 'Play';
     btn.setAttribute('aria-label', 'Play spoken reply');
     btn.innerHTML = playIcon;
+    // Remember this message's language so later replays use correct TTS pronunciation.
+    btn._lang = (lang || 'en').toLowerCase();
     btn.addEventListener('click', function() {
-      // If THIS button's audio is currently playing, pause it (keep position).
       if (currentAudioBtn === btn && currentAudio && !currentAudio.paused && !currentAudio.ended) {
         try { currentAudio.pause(); } catch(e) {}
         btn._reset();
         return;
       }
-      // If THIS button's audio is paused mid-way, resume from where we left off.
       if (currentAudioBtn === btn && currentAudio && currentAudio.paused && !currentAudio.ended) {
         try { currentAudio.play(); btn._active(); } catch(e) {}
         return;
       }
-      // Otherwise fetch a fresh TTS and play from the start.
-      speak(text, btn);
+      speak(text, btn, btn._lang);
     });
     btn._reset = function() { btn.innerHTML = playIcon; btn.classList.remove('playing'); btn.title = 'Play'; btn.setAttribute('aria-label', 'Play spoken reply'); };
     btn._active = function() { btn.innerHTML = pauseIcon; btn.classList.add('playing'); btn.title = 'Pause'; btn.setAttribute('aria-label', 'Pause spoken reply'); };
     return btn;
   }
 
-  function addMsg(text, type) {
+  // Right-to-left languages. Bot bubble gets dir="rtl" for these.
+  var RTL_LANGS = { fa: 1, ar: 1, he: 1, ur: 1, ps: 1, sd: 1, ug: 1 };
+  function isRTL(lang) { return !!(lang && RTL_LANGS[lang.toLowerCase()]); }
+
+  function addMsg(text, type, lang) {
     var div = document.createElement('div');
     div.className = 'ada-msg ' + type;
     if (type === 'bot typing') {
@@ -1636,10 +1638,14 @@
     } else {
       var clean = renderText(text);
       div.textContent = clean;
+      if (isRTL(lang)) {
+        div.setAttribute('dir', 'rtl');
+        div.style.textAlign = 'right';
+      }
       if (type === 'bot') {
         var actions = document.createElement('div');
         actions.className = 'ada-msg-actions';
-        actions.appendChild(makeSpeak(clean));
+        actions.appendChild(makeSpeak(clean, lang));
         actions.appendChild(makeCopy(clean));
         div.appendChild(actions);
       }
@@ -1668,12 +1674,13 @@
       var data = await res.json();
       typing.remove();
       var answer = data.error || data.answer;
-      var botDiv = addMsg(answer, 'bot');
+      var lang = (data.language || 'en').toLowerCase();
+      var botDiv = addMsg(answer, 'bot', lang);
       history.push({ role: 'assistant', content: answer });
       // Auto-speak when voice mode is on, OR when the question itself came from voice
       if (opts.fromVoice) {
         var speakBtn = botDiv.querySelector('.ada-speak-btn');
-        speak(answer, speakBtn);
+        speak(answer, speakBtn, lang);
       }
     } catch(e) {
       typing.remove();
@@ -1687,6 +1694,25 @@
   input.addEventListener('keydown', function(e) {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
   });
+
+  // Focusing / tapping the text box while voice recording is active clearly
+  // means the user wants to type instead of speak. Cancel the recording,
+  // discard the captured audio, and let them type. Intuitive on mobile.
+  function cancelAnyActiveRecording() {
+    if (recorder && recorder.state === 'recording') {
+      try {
+        // Suppress the transcription path on this cancel.
+        recorder.onstop = function() { cleanupStream(); recChunks = []; };
+        recorder.stop();
+      } catch(e) {}
+      setMicState('idle');
+      input.placeholder = 'Ask a question about Spacefaring Ventures...';
+      if (micBtn) micBtn.setAttribute('aria-label', 'Record voice question');
+    }
+  }
+  input.addEventListener('focus', cancelAnyActiveRecording);
+  input.addEventListener('mousedown', cancelAnyActiveRecording);
+  input.addEventListener('touchstart', cancelAnyActiveRecording, { passive: true });
 
   // Render the welcome message via addMsg so it gets the speak + copy buttons
   addMsg('Welcome to Spacefaring Ventures. I\u2019m Ada, an AI assistant providing general information about our firm. How can I help you today?', 'bot');
@@ -1823,7 +1849,8 @@
       var form = new FormData();
       form.append('file', uploadBlob, filename);
       form.append('model', 'grok-voice-stt');
-      form.append('language', 'en');
+      // Do NOT force language=en - xAI STT auto-detects Farsi/Hindi/Mandarin/etc.
+      // Forcing English would make non-English speech transcribe as nonsense.
       form.append('prompt', STT_PROMPT);
       var r = await fetch(API + '/voice/stt', { method: 'POST', body: form });
       var j = {};
@@ -2003,8 +2030,13 @@
     var s = (text || '').trim();
     if (!s) return [];
     if (s.length <= 140) return [s];
-    // Split on sentence boundaries, preserve punctuation + trailing space.
-    var parts = s.match(/[^.!?\n]+[.!?]+\s*|[^.!?\n]+$/g) || [s];
+    // Multilingual sentence terminators:
+    //   .!?       - Latin / Cyrillic / most European
+    //   ؟         - Persian/Arabic question mark (U+061F)
+    //   ।         - Devanagari danda (U+0964) for Hindi/Sanskrit
+    //   。！？     - CJK fullwidth period / exclamation / question
+    var TERMS = '.!?\u061F\u0964\u3002\uFF01\uFF1F';
+    var parts = s.match(new RegExp('[^' + TERMS + '\\n]+[' + TERMS + ']+\\s*|[^' + TERMS + '\\n]+$', 'g')) || [s];
     var chunks = [];
     var cur = '';
     for (var i = 0; i < parts.length; i++) {
@@ -2016,11 +2048,11 @@
     return chunks;
   }
 
-  function fetchTTSBlob(text, abortCtrl) {
+  function fetchTTSBlob(text, abortCtrl, lang) {
     var opts = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text: text, language: 'en' })
+      body: JSON.stringify({ text: text, language: (lang || 'en').toLowerCase() })
     };
     if (abortCtrl) opts.signal = abortCtrl.signal;
     return fetch(API + '/voice/tts', opts).then(function(r) {
@@ -2053,11 +2085,13 @@
     });
   }
 
-  async function speak(text, btn) {
+  async function speak(text, btn, lang) {
     if (!text) return;
     stopSpeaking();
     if (btn && btn._active) btn._active();
     currentAudioBtn = btn || null;
+    // Resolve language: explicit arg > button's remembered language > English
+    var spokenLang = (lang || (btn && btn._lang) || 'en').toLowerCase();
 
     var chunks = chunkForTTS(text.slice(0, 1800));
     if (chunks.length === 0) { stopSpeaking(); return; }
@@ -2068,7 +2102,7 @@
     var blobPromises = chunks.map(function(ch) {
       var ac = null;
       try { ac = new AbortController(); aborts.push(ac); } catch(e) {}
-      return fetchTTSBlob(ch, ac);
+      return fetchTTSBlob(ch, ac, spokenLang);
     });
     currentAbort = {
       abort: function() { aborts.forEach(function(a) { try { a.abort(); } catch(e) {} }); }
