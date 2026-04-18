@@ -1994,109 +1994,98 @@
     return ensurePersistentAudio();
   }
 
+  /* SENTENCE-CHUNKED TTS: split the answer into short chunks, fire all TTS
+   * requests in parallel, play blobs in order as they arrive. First chunk is
+   * intentionally short (~80 chars) so first audio starts ~1s after the call.
+   * Works on every browser - no MediaSource / MSE dependency (iOS doesn't
+   * support MSE audio/mpeg reliably on either <audio> or <video>). */
+  function chunkForTTS(text) {
+    var s = (text || '').trim();
+    if (!s) return [];
+    if (s.length <= 140) return [s];
+    // Split on sentence boundaries, preserve punctuation + trailing space.
+    var parts = s.match(/[^.!?\n]+[.!?]+\s*|[^.!?\n]+$/g) || [s];
+    var chunks = [];
+    var cur = '';
+    for (var i = 0; i < parts.length; i++) {
+      cur += parts[i];
+      var target = chunks.length === 0 ? 80 : 260;
+      if (cur.length >= target) { chunks.push(cur.trim()); cur = ''; }
+    }
+    if (cur.trim()) chunks.push(cur.trim());
+    return chunks;
+  }
+
+  function fetchTTSBlob(text, abortCtrl) {
+    var opts = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: text, language: 'en' })
+    };
+    if (abortCtrl) opts.signal = abortCtrl.signal;
+    return fetch(API + '/voice/tts', opts).then(function(r) {
+      if (!r.ok) throw new Error('tts http ' + r.status);
+      return r.blob();
+    });
+  }
+
+  function playOneBlob(blob) {
+    return new Promise(function(resolve) {
+      var url = URL.createObjectURL(blob);
+      currentAudioUrl = url;
+      var media = getPlaybackElement();
+      try { media.pause(); } catch(e) {}
+      media.src = url;
+      currentAudio = media;
+      var done = false;
+      function cleanup() {
+        if (done) return; done = true;
+        try { URL.revokeObjectURL(url); } catch(e) {}
+        if (currentAudioUrl === url) currentAudioUrl = null;
+        resolve();
+      }
+      media.onended = cleanup;
+      media.onerror = cleanup;
+      var p = media.play();
+      if (p && typeof p.then === 'function') {
+        p.catch(function() { cleanup(); });
+      }
+    });
+  }
+
   async function speak(text, btn) {
     if (!text) return;
     stopSpeaking();
     if (btn && btn._active) btn._active();
     currentAudioBtn = btn || null;
-    try {
-      var fetchOpts = {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: text.slice(0, 1800), language: 'en' })
-      };
-      try { currentAbort = new AbortController(); fetchOpts.signal = currentAbort.signal; }
-      catch(e) { currentAbort = null; }
-      var r = await fetch(API + '/voice/tts', fetchOpts);
-      if (!r.ok) { stopSpeaking(); return; }
-      // Prefer streaming playback (starts on first chunk) when the browser
-      // supports MediaSource + audio/mpeg. Fall back to a buffered Blob URL
-      // (full-download-then-play) for Safari/older browsers that don't.
-      if (canStreamMp3() && r.body && typeof r.body.getReader === 'function') {
-        await playStreaming(r);
-      } else {
-        await playBuffered(r);
-      }
-    } catch(e) { stopSpeaking(); }
-  }
 
-  async function playBuffered(response) {
-    var blob = await response.blob();
-    currentAudioUrl = URL.createObjectURL(blob);
-    // Reuse the gesture-unlocked element so play() works on mobile even after
-    // the mic-tap gesture has expired. On iOS that element is a <video>, on
-    // desktop/Android it's an <audio>.
-    var media = getPlaybackElement();
-    try { media.pause(); } catch(e) {}
-    media.src = currentAudioUrl;
-    currentAudio = media;
-    media.onended = function() { stopSpeaking(); };
-    media.onerror = function() { stopSpeaking(); };
-    try { await media.play(); } catch(e) { stopSpeaking(); }
-  }
+    var chunks = chunkForTTS(text.slice(0, 1800));
+    if (chunks.length === 0) { stopSpeaking(); return; }
 
-  function playStreaming(response) {
-    return new Promise(function(resolve) {
-      var ms = new MediaSource();
-      currentAudioUrl = URL.createObjectURL(ms);
-      // iOS must use <video> for MSE; audio won't play. Desktop / Android use
-      // <audio>. Both elements are unlocked synchronously on mic-tap so
-      // .play() still works here after the async STT+chat round-trip.
-      var media = getPlaybackElement();
-      try { media.pause(); } catch(e) {}
-      media.src = currentAudioUrl;
-      currentAudio = media;
-      media.onended = function() { stopSpeaking(); };
-      media.onerror = function() { stopSpeaking(); };
-      ms.addEventListener('sourceopen', function onOpen() {
-        ms.removeEventListener('sourceopen', onOpen);
-        var sb;
-        try { sb = ms.addSourceBuffer('audio/mpeg'); }
-        catch(e) { stopSpeaking(); resolve(); return; }
-        try { sb.mode = 'sequence'; } catch(e) {}
-        var reader;
-        try { reader = response.body.getReader(); }
-        catch(e) { stopSpeaking(); resolve(); return; }
-        currentReader = reader;
-        var queue = [];
-        var reading = true;
-        var appending = false;
-        var started = false;
-
-        function flush() {
-          if (appending || sb.updating) return;
-          if (queue.length === 0) {
-            if (!reading && ms.readyState === 'open') {
-              try { ms.endOfStream(); } catch(e) {}
-            }
-            return;
-          }
-          appending = true;
-          try { sb.appendBuffer(queue.shift()); }
-          catch(e) { appending = false; stopSpeaking(); }
-        }
-
-        sb.addEventListener('updateend', function() {
-          appending = false;
-          if (!started) {
-            started = true;
-            media.play().then(function() { resolve(); }).catch(function() {
-              stopSpeaking(); resolve();
-            });
-          }
-          flush();
-        });
-
-        (function pump() {
-          reader.read().then(function(chunk) {
-            if (chunk.done) { reading = false; flush(); return; }
-            queue.push(chunk.value);
-            flush();
-            pump();
-          }).catch(function() { reading = false; try { flush(); } catch(e) {} });
-        })();
-      }, { once: true });
+    // Fire all TTS requests in parallel. Each chunk is short so the first
+    // blob arrives quickly and audio starts well before later chunks finish.
+    var aborts = [];
+    var blobPromises = chunks.map(function(ch) {
+      var ac = null;
+      try { ac = new AbortController(); aborts.push(ac); } catch(e) {}
+      return fetchTTSBlob(ch, ac);
     });
+    currentAbort = {
+      abort: function() { aborts.forEach(function(a) { try { a.abort(); } catch(e) {} }); }
+    };
+
+    try {
+      for (var i = 0; i < blobPromises.length; i++) {
+        if (!currentAudioBtn) return;
+        var blob;
+        try { blob = await blobPromises[i]; }
+        catch(e) { break; }
+        if (!currentAudioBtn) return;
+        if (!blob) continue;
+        await playOneBlob(blob);
+      }
+    } catch(e) { /* aborted or network */ }
+    stopSpeaking();
   }
 })();
 </script>
