@@ -1379,10 +1379,14 @@
   .ada-msg.typing .dots span:nth-child(3) { animation-delay: 0.4s; }
   @keyframes ada-blink { 0%,80%,100% { opacity: 0.2; } 40% { opacity: 1; } }
 
+  .ada-msg-actions {
+    display: flex; justify-content: flex-end; align-items: center;
+    gap: 0.1rem; margin-top: 0.4rem; clear: both;
+  }
   .ada-copy-btn {
-    display: block; margin-top: 0.4rem; margin-left: auto;
+    display: inline-flex; align-items: center; justify-content: center;
     background: none; border: none; cursor: pointer; padding: 0.2rem;
-    border-radius: 4px; opacity: 0; transition: opacity 0.2s;
+    border-radius: 4px; opacity: 0.5; transition: opacity 0.2s;
   }
   .ada-copy-btn:hover { background: rgba(255,255,255,0.1); }
   .ada-copy-btn svg { width: 13px; height: 13px; stroke: var(--text-muted); fill: none; stroke-width: 1.8; }
@@ -1480,14 +1484,12 @@
 
   .ada-speak-btn {
     display: inline-flex; align-items: center; justify-content: center;
-    margin-top: 0.35rem; margin-right: 0.2rem;
     background: none; border: none; cursor: pointer; padding: 0.2rem;
-    border-radius: 4px; opacity: 0; transition: opacity 0.2s ease;
-    float: left;
+    border-radius: 4px; opacity: 0.5; transition: opacity 0.2s ease;
   }
   .ada-speak-btn:hover { background: rgba(255,255,255,0.1); }
-  .ada-speak-btn svg { width: 13px; height: 13px; stroke: var(--text-muted); fill: none; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
-  .ada-speak-btn.playing svg { stroke: var(--accent-blue); }
+  .ada-speak-btn svg { width: 12px; height: 12px; fill: var(--text-muted); stroke: none; transition: fill 0.15s; }
+  .ada-speak-btn.playing svg { fill: var(--accent-blue); }
   .ada-msg.bot:hover .ada-speak-btn { opacity: 1; }
 </style>
 
@@ -1512,9 +1514,7 @@
       </button>
     </div>
   </div>
-  <div id="ada-messages">
-    <div class="ada-msg bot">Welcome to Spacefaring Ventures. I'm Ada, an AI assistant providing general information about our firm. How can I help you today?</div>
-  </div>
+  <div id="ada-messages"></div>
   <div id="ada-input-area">
     <div class="ada-input-wrap">
       <button id="ada-mic" aria-label="Record voice question" title="Voice input">
@@ -1607,21 +1607,30 @@
   }
 
   function makeSpeak(text) {
-    var spkIcon = '<svg viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>';
-    var stopIcon = '<svg viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="17" y1="8" x2="22" y2="13"></line><line x1="22" y1="8" x2="17" y2="13"></line></svg>';
+    var playIcon = '<svg viewBox="0 0 24 24"><polygon points="7 4 19 12 7 20"></polygon></svg>';
+    var pauseIcon = '<svg viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>';
     var btn = document.createElement('button');
     btn.className = 'ada-speak-btn';
     btn.title = 'Play';
-    btn.innerHTML = spkIcon;
+    btn.setAttribute('aria-label', 'Play spoken reply');
+    btn.innerHTML = playIcon;
     btn.addEventListener('click', function() {
-      if (btn.classList.contains('playing')) {
-        stopSpeaking();
-      } else {
-        speak(text, btn);
+      // If THIS button's audio is currently playing, pause it (keep position).
+      if (currentAudioBtn === btn && currentAudio && !currentAudio.paused && !currentAudio.ended) {
+        try { currentAudio.pause(); } catch(e) {}
+        btn._reset();
+        return;
       }
+      // If THIS button's audio is paused mid-way, resume from where we left off.
+      if (currentAudioBtn === btn && currentAudio && currentAudio.paused && !currentAudio.ended) {
+        try { currentAudio.play(); btn._active(); } catch(e) {}
+        return;
+      }
+      // Otherwise fetch a fresh TTS and play from the start.
+      speak(text, btn);
     });
-    btn._reset = function() { btn.innerHTML = spkIcon; btn.classList.remove('playing'); btn.title = 'Play'; };
-    btn._active = function() { btn.innerHTML = stopIcon; btn.classList.add('playing'); btn.title = 'Stop'; };
+    btn._reset = function() { btn.innerHTML = playIcon; btn.classList.remove('playing'); btn.title = 'Play'; btn.setAttribute('aria-label', 'Play spoken reply'); };
+    btn._active = function() { btn.innerHTML = pauseIcon; btn.classList.add('playing'); btn.title = 'Pause'; btn.setAttribute('aria-label', 'Pause spoken reply'); };
     return btn;
   }
 
@@ -1634,8 +1643,11 @@
       var clean = renderText(text);
       div.textContent = clean;
       if (type === 'bot') {
-        div.appendChild(makeSpeak(clean));
-        div.appendChild(makeCopy(clean));
+        var actions = document.createElement('div');
+        actions.className = 'ada-msg-actions';
+        actions.appendChild(makeSpeak(clean));
+        actions.appendChild(makeCopy(clean));
+        div.appendChild(actions);
       }
     }
     msgArea.appendChild(div);
@@ -1682,6 +1694,9 @@
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
   });
 
+  // Render the welcome message via addMsg so it gets the speak + copy buttons
+  addMsg('Welcome to Spacefaring Ventures. I\u2019m Ada, an AI assistant providing general information about our firm. How can I help you today?', 'bot');
+
   /* ========================================================================
    * VOICE INTEGRATION
    * - Mic button records via MediaRecorder, converts to 16-bit PCM WAV,
@@ -1698,6 +1713,7 @@
 
   var recorder = null, recStream = null, recChunks = [], recMime = '';
   var currentAudio = null, currentAudioBtn = null, currentAudioUrl = null;
+  var currentReader = null, currentAbort = null;
 
   var STT_PROMPT = 'This is a question for Ada at Spacefaring Ventures, an investment firm focused on space technology. Common vocabulary: Spacefaring Ventures, Fund I, Fund II, Fund III, Anish Philip Chacko, limited partner, general partner, capital call, portfolio company, SpaceX, Rocket Lab, Relativity Space, Stoke Space, K2 Space, ir@spacefaring.ventures, spacefaring.ventures.';
 
@@ -1862,6 +1878,10 @@
   }
 
   function stopSpeaking() {
+    // Abort any in-flight fetch so we stop pulling bytes from the Worker.
+    if (currentAbort) { try { currentAbort.abort(); } catch(e) {} currentAbort = null; }
+    // Cancel the streaming reader so pump() exits cleanly.
+    if (currentReader) { try { currentReader.cancel(); } catch(e) {} currentReader = null; }
     if (currentAudio) {
       try { currentAudio.pause(); } catch(e) {}
       currentAudio = null;
@@ -1871,26 +1891,109 @@
     if (currentAudioUrl) { try { URL.revokeObjectURL(currentAudioUrl); } catch(e) {} currentAudioUrl = null; }
   }
 
+  function canStreamMp3() {
+    try {
+      return typeof MediaSource !== 'undefined'
+        && typeof MediaSource.isTypeSupported === 'function'
+        && MediaSource.isTypeSupported('audio/mpeg');
+    } catch(e) { return false; }
+  }
+
   async function speak(text, btn) {
     if (!text) return;
     stopSpeaking();
     if (btn && btn._active) btn._active();
     currentAudioBtn = btn || null;
     try {
-      var r = await fetch(API + '/voice/tts', {
+      var fetchOpts = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: text.slice(0, 1800), language: 'en' })
-      });
+      };
+      try { currentAbort = new AbortController(); fetchOpts.signal = currentAbort.signal; }
+      catch(e) { currentAbort = null; }
+      var r = await fetch(API + '/voice/tts', fetchOpts);
       if (!r.ok) { stopSpeaking(); return; }
-      var blob = await r.blob();
-      currentAudioUrl = URL.createObjectURL(blob);
+      // Prefer streaming playback (starts on first chunk) when the browser
+      // supports MediaSource + audio/mpeg. Fall back to a buffered Blob URL
+      // (full-download-then-play) for Safari/older browsers that don't.
+      if (canStreamMp3() && r.body && typeof r.body.getReader === 'function') {
+        await playStreaming(r);
+      } else {
+        await playBuffered(r);
+      }
+    } catch(e) { stopSpeaking(); }
+  }
+
+  async function playBuffered(response) {
+    var blob = await response.blob();
+    currentAudioUrl = URL.createObjectURL(blob);
+    var audio = new Audio(currentAudioUrl);
+    currentAudio = audio;
+    audio.onended = function() { stopSpeaking(); };
+    audio.onerror = function() { stopSpeaking(); };
+    try { await audio.play(); } catch(e) { /* autoplay blocked */ stopSpeaking(); }
+  }
+
+  function playStreaming(response) {
+    return new Promise(function(resolve) {
+      var ms = new MediaSource();
+      currentAudioUrl = URL.createObjectURL(ms);
       var audio = new Audio(currentAudioUrl);
+      audio.preload = 'auto';
       currentAudio = audio;
       audio.onended = function() { stopSpeaking(); };
       audio.onerror = function() { stopSpeaking(); };
-      try { await audio.play(); } catch(e) { /* autoplay blocked - user can click replay */ stopSpeaking(); }
-    } catch(e) { stopSpeaking(); }
+      ms.addEventListener('sourceopen', function onOpen() {
+        ms.removeEventListener('sourceopen', onOpen);
+        var sb;
+        try { sb = ms.addSourceBuffer('audio/mpeg'); }
+        catch(e) { stopSpeaking(); resolve(); return; }
+        try { sb.mode = 'sequence'; } catch(e) {}
+        var reader;
+        try { reader = response.body.getReader(); }
+        catch(e) { stopSpeaking(); resolve(); return; }
+        currentReader = reader;
+        var queue = [];
+        var reading = true;
+        var appending = false;
+        var started = false;
+
+        function flush() {
+          if (appending || sb.updating) return;
+          if (queue.length === 0) {
+            if (!reading && ms.readyState === 'open') {
+              try { ms.endOfStream(); } catch(e) {}
+            }
+            return;
+          }
+          appending = true;
+          try { sb.appendBuffer(queue.shift()); }
+          catch(e) { appending = false; stopSpeaking(); }
+        }
+
+        sb.addEventListener('updateend', function() {
+          appending = false;
+          if (!started) {
+            started = true;
+            audio.play().then(function() { resolve(); }).catch(function() {
+              /* autoplay blocked - user can click replay */
+              stopSpeaking(); resolve();
+            });
+          }
+          flush();
+        });
+
+        (function pump() {
+          reader.read().then(function(chunk) {
+            if (chunk.done) { reading = false; flush(); return; }
+            queue.push(chunk.value);
+            flush();
+            pump();
+          }).catch(function() { reading = false; try { flush(); } catch(e) {} });
+        })();
+      }, { once: true });
+    });
   }
 })();
 </script>
