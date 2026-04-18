@@ -1,3 +1,4 @@
+
 <!--
   Copyright (c) 2026 Spacefaring Ventures LLC. All rights reserved.
   This source code is the proprietary and confidential property of Spacefaring Ventures LLC.
@@ -1367,11 +1368,11 @@
   }
   .ada-msg.bot {
     align-self: flex-start; color: var(--text-secondary);
-    background: rgba(255,255,255,0.04);
+    background: transparent; border: none;
   }
   .ada-msg.user {
     align-self: flex-end; color: #fff;
-    background: rgba(74, 125, 255, 0.15);
+    background: transparent; border: none;
   }
   .ada-msg.typing { color: var(--text-muted); font-style: italic; }
   .ada-msg.typing .dots span { animation: ada-blink 1.4s infinite both; font-style: normal; }
@@ -1438,11 +1439,7 @@
     .ada-speak-btn { opacity: 0.5; }
   }
 
-  /* Voice input + output controls */
-  #ada-voice-toggle svg { transition: stroke 0.15s; }
-  #ada-voice-toggle.on { background: rgba(74, 125, 255, 0.1); }
-  #ada-voice-toggle.on svg { stroke: var(--accent-blue); }
-
+  /* Voice input controls */
   #ada-mic {
     background: transparent;
     border: 1px solid rgba(255,255,255,0.1);
@@ -1503,9 +1500,6 @@
   <div id="ada-header">
     <span class="ada-title">Ada</span>
     <div class="ada-controls">
-      <button id="ada-voice-toggle" title="Toggle spoken replies" aria-pressed="false">
-        <svg viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
-      </button>
       <button id="ada-popout" title="Open in new tab">
         <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
       </button>
@@ -1677,7 +1671,7 @@
       var botDiv = addMsg(answer, 'bot');
       history.push({ role: 'assistant', content: answer });
       // Auto-speak when voice mode is on, OR when the question itself came from voice
-      if (voiceEnabled || opts.fromVoice) {
+      if (opts.fromVoice) {
         var speakBtn = botDiv.querySelector('.ada-speak-btn');
         speak(answer, speakBtn);
       }
@@ -1702,14 +1696,11 @@
    * - Mic button records via MediaRecorder, converts to 16-bit PCM WAV,
    *   uploads to Worker /voice/stt with a Spacefaring vocabulary prompt
    *   hint, normalizes phonetic variants of the firm name, auto-sends.
-   * - Toggle in the header enables spoken replies (xAI TTS) for all turns.
-   *   Mic-initiated turns always get a spoken reply, regardless of toggle.
-   * - Per-message replay button lets users hear any bot reply on demand.
+   * - Mic-initiated turns always get a spoken reply via xAI TTS.
+   * - Typed turns are silent by default; per-message play buttons let the
+   *   user hear any bot reply on demand.
    * ====================================================================== */
   var micBtn = document.getElementById('ada-mic');
-  var voiceToggleBtn = document.getElementById('ada-voice-toggle');
-  var voiceEnabled = false;
-  try { voiceEnabled = localStorage.getItem('ada-voice-enabled') === '1'; } catch(e) {}
 
   var recorder = null, recStream = null, recChunks = [], recMime = '';
   var currentAudio = null, currentAudioBtn = null, currentAudioUrl = null;
@@ -1767,20 +1758,6 @@
       var decoded = await ac.decodeAudioData(ab.slice(0));
       return audioBufferToWav(decoded);
     } finally { try { await ac.close(); } catch(e) {} }
-  }
-
-  function syncVoiceToggle() {
-    if (voiceEnabled) { voiceToggleBtn.classList.add('on'); voiceToggleBtn.setAttribute('aria-pressed', 'true'); voiceToggleBtn.title = 'Spoken replies: on'; }
-    else { voiceToggleBtn.classList.remove('on'); voiceToggleBtn.setAttribute('aria-pressed', 'false'); voiceToggleBtn.title = 'Spoken replies: off'; }
-  }
-  if (voiceToggleBtn) {
-    syncVoiceToggle();
-    voiceToggleBtn.addEventListener('click', function() {
-      voiceEnabled = !voiceEnabled;
-      try { localStorage.setItem('ada-voice-enabled', voiceEnabled ? '1' : '0'); } catch(e) {}
-      syncVoiceToggle();
-      if (!voiceEnabled) stopSpeaking();
-    });
   }
 
   function setMicState(state) {
