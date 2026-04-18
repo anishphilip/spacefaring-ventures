@@ -1,0 +1,297 @@
+<!--
+  Copyright (c) 2026 Spacefaring Ventures LLC. All rights reserved.
+  This source code is the proprietary and confidential property of Spacefaring Ventures LLC.
+  Unauthorized copying, modification, distribution, or use of this code, in whole or in part,
+  is strictly prohibited without the express written permission of Spacefaring Ventures LLC.
+  www.spacefaring.ventures
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="copyright" content="Copyright 2026 Spacefaring Ventures LLC. All rights reserved.">
+<meta name="author" content="Spacefaring Ventures LLC">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Privacy Policy - Spacefaring Ventures</title>
+<meta name="description" content="Privacy Policy for Spacefaring Ventures LLC - how we handle your data when you visit spacefaring.ventures.">
+<meta property="og:title" content="Privacy Policy - Spacefaring Ventures">
+<meta property="og:description" content="Privacy Policy for Spacefaring Ventures LLC.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://www.spacefaring.ventures/privacy.html">
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500&family=Lato:wght@100;300;400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-primary: #050507;
+    --bg-secondary: #08090e;
+    --bg-card: #0c0e15;
+    --text-primary: #ffffff;
+    --text-secondary: #c8d0e0;
+    --text-muted: #6b7a94;
+    --accent: #ffffff;
+    --accent-blue: #4a7dff;
+    --accent-glow: rgba(74, 125, 255, 0.15);
+    --border: rgba(255,255,255,0.05);
+    --font-display: 'Outfit', sans-serif;
+    --font-body: 'Lato', sans-serif;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: var(--font-body);
+    background: #030305;
+    color: var(--text-primary);
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 1.5rem 4rem;
+    display: flex; justify-content: space-between; align-items: center;
+    background: rgba(5,5,7,0.88);
+    backdrop-filter: blur(24px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-logo {
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: 1.1rem;
+    letter-spacing: 0.22em;
+    color: var(--text-primary);
+    text-decoration: none;
+    text-transform: uppercase;
+  }
+  .nav-logo span { color: var(--accent); }
+  .nav-links { display: flex; gap: 2.5rem; }
+  .nav-links a {
+    font-family: var(--font-display);
+    font-size: 0.82rem;
+    font-weight: 300;
+    letter-spacing: 0.14em;
+    color: var(--accent-blue);
+    text-decoration: none;
+    text-transform: uppercase;
+    transition: color 0.3s;
+  }
+  .nav-links a:hover { color: #6b9aff; }
+  /* CONTENT */
+  .privacy-content {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 10rem 2rem 4rem;
+    position: relative;
+    z-index: 1;
+  }
+  .privacy-content h1 {
+    font-family: var(--font-display);
+    font-size: 2.2rem;
+    font-weight: 300;
+    letter-spacing: 0.04em;
+    margin-bottom: 0.5rem;
+  }
+  .privacy-content .effective-date {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    font-weight: 300;
+    margin-bottom: 3rem;
+  }
+  .privacy-content h2 {
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    font-weight: 400;
+    letter-spacing: 0.06em;
+    color: var(--accent-blue);
+    margin-top: 2.5rem;
+    margin-bottom: 0.8rem;
+  }
+  .privacy-content p {
+    font-family: var(--font-body);
+    font-size: 0.92rem;
+    font-weight: 300;
+    color: var(--text-secondary);
+    line-height: 1.85;
+    margin-bottom: 1rem;
+  }
+  .privacy-content ul {
+    list-style: none;
+    padding-left: 0;
+    margin-bottom: 1rem;
+  }
+  .privacy-content ul li {
+    font-family: var(--font-body);
+    font-size: 0.92rem;
+    font-weight: 300;
+    color: var(--text-secondary);
+    line-height: 1.85;
+    padding-left: 1.2rem;
+    position: relative;
+    margin-bottom: 0.3rem;
+  }
+  .privacy-content ul li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.75rem;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--accent-blue);
+  }
+  .privacy-content a {
+    color: var(--accent-blue);
+    text-decoration: none;
+    transition: color 0.3s;
+  }
+  .privacy-content a:hover { color: #6b9aff; }
+  /* DISCLAIMER */
+  .disclaimer {
+    padding: 3rem 4rem 1rem;
+    border-top: 1px solid var(--border);
+    text-align: center;
+  }
+  .disclaimer p {
+    font-family: var(--font-body);
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    font-weight: 300;
+    line-height: 1.8;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  /* FOOTER */
+  footer {
+    padding: 2.5rem 4rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  footer p {
+    font-family: var(--font-body);
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    letter-spacing: 0.03em;
+    font-weight: 300;
+  }
+  .footer-badge {
+    font-family: var(--font-display);
+    font-size: 0.7rem;
+    font-weight: 300;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+    padding: 0.4rem 1rem;
+    border-radius: 100px;
+  }
+  /* MOBILE */
+  @media (max-width: 900px) {
+    nav { padding: 1.2rem 2rem; }
+    .privacy-content { padding: 8rem 1.5rem 3rem; }
+    .disclaimer { padding: 2rem 2rem 1rem; }
+    footer { padding: 2rem; }
+  }
+  @media (max-width: 600px) {
+    nav { flex-direction: column; gap: 1rem; padding: 1rem 1.5rem; }
+    .nav-links { flex-direction: column; gap: 1rem; align-items: center; }
+    .nav-links a { font-size: 1rem; letter-spacing: 0.14em; }
+    .privacy-content { padding: 12rem 1.2rem 2rem; }
+    .privacy-content h1 { font-size: 1.6rem; }
+    footer { flex-direction: column; gap: 1rem; text-align: center; }
+  }
+</style>
+</head>
+<body>
+<!-- NAVIGATION -->
+<nav>
+  <a href="/" class="nav-logo"><span>S</span>pacefaring Ventures</a>
+  <div class="nav-links">
+    <a href="/#mission">Mission</a>
+    <a href="/#thesis">Thesis</a>
+    <a href="/#portfolio">Portfolio</a>
+    <a href="/#story">Story</a>
+    <a href="/#founder">Founder</a>
+    <a href="/#contact">Contact</a>
+  </div>
+</nav>
+
+<!-- PRIVACY POLICY CONTENT -->
+<main class="privacy-content">
+  <h1>Privacy Policy</h1>
+  <p class="effective-date">Effective Date: April 16, 2026</p>
+
+  <p>Spacefaring Ventures LLC ("we," "us," or "our") operates the website at spacefaring.ventures. This Privacy Policy explains what information is collected when you visit our site, how it is used, and your choices regarding that information. We believe in transparency and minimal data collection.</p>
+
+  <h2>Information We Collect</h2>
+  <p>We designed this website to collect as little personal information as possible. Here is what our site and its services may process:</p>
+
+  <p><strong>Infrastructure logs (Cloudflare).</strong> Our website is delivered through Cloudflare's content delivery network. As part of standard CDN and DNS operations, Cloudflare may temporarily process visitor IP addresses for security, performance optimization, and country-level analytics. Cloudflare discards raw IP addresses after deriving aggregate metrics. This processing is governed by <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener">Cloudflare's Privacy Policy</a>, not ours.</p>
+
+  <p><strong>Cloudflare Web Analytics.</strong> We use Cloudflare Web Analytics to understand aggregate visitor traffic (page views, device types, browsers, and country-level geography). This service does not use cookies, does not track individual users across sites, and does not store personally identifiable information. It is designed to be privacy-first and compliant with GDPR, CCPA, and similar regulations by default.</p>
+
+  <p><strong>Ada (AI assistant).</strong> Our website features an AI-powered assistant called Ada that answers general questions about Spacefaring Ventures. Ada does not collect any personally identifiable information from visitors - no IP addresses, no names, no email addresses, and no device identifiers. When Ada cannot answer a question, the question text and a timestamp are logged so we can improve our knowledge base. These logs contain only the question itself and the time it was asked - nothing that identifies who asked it.</p>
+
+  <p>Ada is powered by Anthropic's API. When you interact with Ada, your question text is sent to Anthropic for processing. Anthropic's handling of this data is governed by <a href="https://www.anthropic.com/privacy" target="_blank" rel="noopener">Anthropic's Privacy Policy</a>. No visitor-identifying information is included in these API requests.</p>
+
+  <h2>Information We Do Not Collect</h2>
+  <p>To be clear about what we do not do:</p>
+  <ul>
+    <li>We do not use tracking cookies or any cookies for analytics purposes</li>
+    <li>We do not use Google Analytics or any third-party tracking scripts</li>
+    <li>We do not collect names, email addresses, or other personal information through the website</li>
+    <li>We do not sell, rent, or share any visitor data with third parties</li>
+    <li>We do not build visitor profiles or track users across websites</li>
+    <li>We do not use fingerprinting or any other persistent identification methods</li>
+  </ul>
+
+  <h2>How We Use Information</h2>
+  <p>The limited information described above is used solely to operate and improve our website - specifically, to ensure the site loads quickly and securely (via Cloudflare), to understand aggregate traffic patterns (via Cloudflare Web Analytics), and to improve Ada's ability to answer visitor questions (via anonymous question logs).</p>
+
+  <h2>Cookies</h2>
+  <p>Our website does not set any first-party cookies. Cloudflare may set a minimal technical cookie (such as __cf_bm) for bot detection and security purposes. This is a functional cookie required for site operation, not a tracking cookie. No consent banner is needed because we do not use cookies for analytics or advertising.</p>
+
+  <h2>Third-Party Services</h2>
+  <p>Our website relies on the following third-party services:</p>
+  <ul>
+    <li><strong>GitHub Pages</strong> - website hosting</li>
+    <li><strong>Cloudflare</strong> - CDN, DNS, security, and privacy-first web analytics</li>
+    <li><strong>Anthropic</strong> - AI language model API that powers Ada</li>
+    <li><strong>Google Fonts</strong> - web font delivery (Outfit and Lato typefaces)</li>
+  </ul>
+  <p>Each of these services has its own privacy policy governing how it handles data. We encourage you to review their policies if you have concerns.</p>
+
+  <h2>Data Retention</h2>
+  <p>Cloudflare Web Analytics data is retained for up to 6 months in aggregate form. Ada's anonymous question logs are retained only as long as needed to improve the knowledge base and are periodically reviewed and purged. We do not maintain any long-term records tied to individual visitors.</p>
+
+  <h2>Children's Privacy</h2>
+  <p>Our website is not directed at individuals under the age of 13, and we do not knowingly collect any personal information from children.</p>
+
+  <h2>Financial Services Disclosure</h2>
+  <p>Spacefaring Ventures LLC is a SEC Exempt Reporting Adviser (CRD# 342085). This website is for informational purposes only and does not constitute an offer to sell or a solicitation of an offer to buy any security. If you choose to contact us separately via email or other channels regarding investment opportunities, any personal information you provide in that context is handled in accordance with our investor communications policies and applicable securities regulations - not this website privacy policy.</p>
+
+  <h2>Your Rights</h2>
+  <p>Because we collect virtually no personal information through this website, there is generally no personal data for us to provide, correct, or delete. If you believe we hold any information about you and wish to exercise your rights under applicable privacy laws (including CCPA, CPRA, or GDPR), please contact us and we will respond promptly.</p>
+
+  <h2>Changes to This Policy</h2>
+  <p>We may update this Privacy Policy from time to time. Any changes will be posted on this page with an updated effective date. We encourage you to review this page periodically.</p>
+
+  <h2>Contact Us</h2>
+  <p>If you have questions about this Privacy Policy, please contact us at <a href="mailto:ir@spacefaring.ventures">ir@spacefaring.ventures</a>.</p>
+
+  <p style="margin-top: 2rem; font-size: 0.82rem; color: var(--text-muted);">Spacefaring Ventures LLC<br>San Francisco Bay Area, California</p>
+</main>
+
+<!-- FOOTER -->
+<footer>
+  <p>&copy; 2026 Spacefaring Ventures LLC. All rights reserved.</p>
+  <span class="footer-badge">San Francisco Bay Area</span>
+</footer>
+
+<!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "05cbb98e680e435db4f68bf690c5e4fc"}'></script><!-- End Cloudflare Web Analytics -->
+</body>
+</html>
