@@ -569,6 +569,14 @@
 
   async function send(opts) {
     opts = opts || {};
+    // If user clicks send (or hits Enter) while a voice recording is still
+    // active, treat it exactly like tapping the mic button mid-recording:
+    // stop the recorder. The existing recorder.onstop handler transcribes
+    // the audio and auto-calls send({ fromVoice: true }) with the text.
+    if (recorder && recorder.state === 'recording') {
+      stopRecording();
+      return;
+    }
     var q = questionInput.value.trim();
     if (!q) return;
     questionInput.value = '';
@@ -610,25 +618,10 @@
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
   });
 
-  // If the user focuses the text box (or taps into it on mobile) while a voice
-  // recording is active, they clearly want to type instead of speak - stop the
-  // recording and drop any in-progress audio. Prevents the awkward "I tapped
-  // to type but it silently kept recording" state on iPhone.
-  function cancelAnyActiveRecording() {
-    if (recorder && recorder.state === 'recording') {
-      try {
-        // Swap out onstop so we do NOT fire transcription when the user cancels.
-        recorder.onstop = function() { cleanupStream(); recChunks = []; };
-        recorder.stop();
-      } catch(e) {}
-      setMicState('idle');
-      questionInput.placeholder = 'Ask a question about Spacefaring Ventures...';
-      if (micBtn) micBtn.setAttribute('aria-label', 'Record voice question');
-    }
-  }
-  questionInput.addEventListener('focus', cancelAnyActiveRecording);
-  questionInput.addEventListener('mousedown', cancelAnyActiveRecording);
-  questionInput.addEventListener('touchstart', cancelAnyActiveRecording, { passive: true });
+  // Note: focusing or tapping the text box does NOT cancel an active recording.
+  // The send button (see send() above) finalizes recording by calling stopRecording(),
+  // which runs the normal transcribe-and-send flow. The user only has two voice
+  // endpoints: tap mic again OR tap send - both produce the same result.
 
   /* ========================================================================
    * VOICE INTEGRATION
@@ -933,6 +926,19 @@
     return ensurePersistentAudio();
   }
 
+  /* PREPROCESS TEXT BEFORE TTS
+   * Converts numbered list markers ("1.", "2.", "3.") into "N, " so:
+   *   (a) the regex splitter does NOT break chunks on the period after a digit
+   *       (which was happening and making Grok TTS swallow the "1" / "2" / "3"
+   *       as if they were an abbreviation period at end of chunk), and
+   *   (b) TTS pronounces the number clearly with a natural pause after.
+   * Only runs on list-style "<start|space|colon|semicolon>digit(s).<space>" -
+   * so it never touches decimals like "$250,000.50" or "U.S." abbreviations. */
+  function preprocessForTTS(text) {
+    if (!text) return text;
+    return text.replace(/(^|[\s:;])(\d{1,3})\.(\s+)/g, '$1$2,$3');
+  }
+
   /* SENTENCE-CHUNKED TTS: split the answer into short chunks, fire all TTS
    * requests in parallel, play blobs in order as they arrive. First chunk is
    * intentionally short (~80 chars) so first audio starts ~1s after the call.
@@ -1005,7 +1011,7 @@
     // Resolve language: explicit arg > button's remembered language > English
     var spokenLang = (lang || (btn && btn._lang) || 'en').toLowerCase();
 
-    var chunks = chunkForTTS(text.slice(0, 1800));
+    var chunks = chunkForTTS(preprocessForTTS(text.slice(0, 1800)));
     if (chunks.length === 0) { stopSpeaking(); return; }
 
     var aborts = [];
