@@ -1031,7 +1031,7 @@
     });
   }
   /* SCROLL FADE-IN */
-  var fadeEls = document.querySelectorAll(".mission-inner, .thesis .section-label, .thesis .section-title, .thesis .section-text, .pillar, .portfolio .section-label, .portfolio .section-title, .portfolio .section-text, .portfolio-card, .metric-item, .timeline-item, .founder-image, .founder-content, .contact-inner, .contact-path");
+  var fadeEls = document.querySelectorAll(".mission-inner, .thesis .section-label, .thesis .section-title, .thesis .section-text, .pillar, .portfolio .section-label, .portfolio .section-title, .portfolio .section-text, .portfolio-card, .metric-item, .conviction .section-label, .conviction .section-title, .conviction .section-text, .timeline-item, .founder-image, .founder-content, .contact-inner, .contact-path");
   var timelineIdx = 0;
   fadeEls.forEach(function(el){
     el.classList.add("fade-in");
@@ -1047,7 +1047,7 @@
         fadeObserver.unobserve(entry.target);
       }
     });
-  }, { threshold: 0.08 });
+  }, { threshold: 0.08, rootMargin: '0px 0px -15% 0px' });
   fadeEls.forEach(function(el){ fadeObserver.observe(el); });
   /* FIX: Force fade-in visible when clicking nav anchors */
   links.forEach(function(a){
