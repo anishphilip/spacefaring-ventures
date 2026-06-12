@@ -1,5 +1,6 @@
 
 
+
 <!--
   Copyright (c) 2026 Spacefaring Ventures LLC. All rights reserved.
   This source code is the proprietary and confidential property of Spacefaring Ventures LLC.
@@ -187,6 +188,26 @@
   @media (max-width: 600px) {
     .hero-proof { gap: 1.5rem; flex-wrap: wrap; justify-content: center; }
     .hero-proof span strong { font-size: 1.3rem; }
+  }
+  /* HERO ACCELERATION ENTRANCE (added 2026-06-12, smoothed: compositor-only, starts after fonts/load) */
+  @media (prefers-reduced-motion: no-preference) {
+    @keyframes hero-arrive {
+      0%   { opacity: 0; transform: scale3d(0.12, 0.12, 1); }
+      55%  { opacity: 1; }
+      100% { opacity: 1; transform: scale3d(1, 1, 1); }
+    }
+    @keyframes hero-arrive-soft {
+      from { opacity: 0; transform: translate3d(0, 18px, 0); }
+      to   { opacity: 1; transform: translate3d(0, 0, 0); }
+    }
+    html.anim-armed .hero h1, html.anim-armed .hero-sub, html.anim-armed .hero-proof { opacity: 0; }
+    html.anim-go .hero h1 {
+      animation: hero-arrive 1.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+      will-change: transform, opacity;
+      backface-visibility: hidden;
+    }
+    html.anim-go .hero-sub   { animation: hero-arrive-soft 1.0s ease-out 0.9s both; }
+    html.anim-go .hero-proof { animation: hero-arrive-soft 1.0s ease-out 1.15s both; }
   }
   /* MISSION */
   .mission {
@@ -728,6 +749,23 @@
     .mission { padding: 3rem 1.5rem; }
   }
 </style>
+<script>
+(function(){
+  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  document.documentElement.classList.add('anim-armed');
+  var done = false;
+  function go(){
+    if(done) return; done = true;
+    requestAnimationFrame(function(){ requestAnimationFrame(function(){
+      document.documentElement.classList.add('anim-go');
+      document.dispatchEvent(new Event('sv-anim-go'));
+    }); });
+  }
+  if(document.fonts && document.fonts.ready){ document.fonts.ready.then(go); }
+  window.addEventListener('load', function(){ setTimeout(go, 60); });
+  setTimeout(go, 1200);
+})();
+</script>
 </head>
 <body>
 <!-- ANIMATED STARFIELD BACKGROUND -->
@@ -1034,7 +1072,7 @@
         counterDone = true;
         metricH3s.forEach(function(h3){
           var text = h3.textContent.trim();
-          var match = text.match(/^(\d+)(\+?)$/);
+          var match = text.match(/^(\d+)(.*)$/);
           if(match){
             var target = parseInt(match[1]);
             var suffix = match[2];
@@ -1060,12 +1098,77 @@
   if(metricsSection) counterObserver.observe(metricsSection);
 })();
 </script>
+<!-- HERO SCROLL FLY-THROUGH (added 2026-06-12) -->
+<script>
+(function(){
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(reduced) return;
+  var h1 = document.querySelector('.hero h1');
+  var sub = document.querySelector('.hero-sub');
+  var proof = document.querySelector('.hero-proof');
+  if(!h1) return;
+  h1.addEventListener('animationend', function(){
+    h1.style.opacity = '1';
+    h1.style.transform = 'scale3d(1,1,1)';
+    h1.style.animation = 'none';
+    document.documentElement.classList.remove('anim-armed');
+    flyThrough();
+  });
+  var ticking = false;
+  function flyThrough(){
+    var p = Math.min(Math.max(window.scrollY / (window.innerHeight * 0.85), 0), 1);
+    h1.style.transform = 'scale(' + (1 + p * 0.55).toFixed(4) + ')';
+    h1.style.opacity = Math.max(0, 1 - p * 1.15).toFixed(3);
+    h1.style.filter = p > 0.01 ? 'blur(' + (p * 5).toFixed(2) + 'px)' : 'none';
+    if(sub){ sub.style.transform = 'translateY(' + (p * -40).toFixed(1) + 'px)'; sub.style.opacity = Math.max(0, 1 - p * 1.3).toFixed(3); }
+    if(proof){ proof.style.transform = 'translateY(' + (p * -20).toFixed(1) + 'px)'; proof.style.opacity = Math.max(0, 1 - p * 1.5).toFixed(3); }
+    ticking = false;
+  }
+  window.addEventListener('scroll', function(){
+    if(ticking) return;
+    ticking = true;
+    requestAnimationFrame(flyThrough);
+  }, {passive:true});
+  /* HERO STAT COUNT-UP on arrival (added 2026-06-12) */
+  function runHeroCounters(){
+    var nums = document.querySelectorAll('.hero-proof span strong');
+    nums.forEach(function(el){
+      var text = el.textContent.trim();
+      var m = text.match(/^(\d+)(.*)$/);
+      if(!m) return;
+      var target = parseInt(m[1]);
+      var suffix = m[2];
+      var duration = 1200;
+      var startTime = null;
+      function step(ts){
+        if(!startTime) startTime = ts;
+        var pr = Math.min((ts - startTime) / duration, 1);
+        var eased = 1 - Math.pow(1 - pr, 3);
+        el.textContent = Math.floor(eased * target) + suffix;
+        if(pr < 1) requestAnimationFrame(step);
+      }
+      el.textContent = '0' + suffix;
+      requestAnimationFrame(step);
+    });
+  }
+  var heroCounted = false;
+  function armHeroCounters(){
+    if(heroCounted) return;
+    heroCounted = true;
+    setTimeout(runHeroCounters, 1150);
+  }
+  if(document.documentElement.classList.contains('anim-go')) armHeroCounters();
+  else document.addEventListener('sv-anim-go', armHeroCounters);
+})();
+</script>
 <!-- ANIMATED STARFIELD -->
 <script>
 (function(){
   var canvas = document.getElementById('starfield');
   if(!canvas) return;
   var ctx = canvas.getContext('2d');
+  var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var warpStart = null;
   var dpr = Math.min(window.devicePixelRatio || 1, 2);
   /* --- MOUSE PARALLAX --- */
   var mouseX = 0.5, mouseY = 0.5;
@@ -1241,6 +1344,30 @@
       ctx.fill();
     }
 
+    /* WARP INTRO - stars streak radially during the headline arrival (added 2026-06-12) */
+    if(warpStart === null && document.documentElement.classList.contains('anim-go')) warpStart = t;
+    var wt = warpStart === null ? 99 : t - warpStart;
+    if(wt < 1.6 && !reducedMotion){
+      var wf = Math.pow(1 - wt / 1.6, 2);
+      ctx.lineWidth = 1;
+      for(var wi = 0; wi < stars.length; wi += 3){
+        var ws = stars[wi];
+        var wx = ws.x * w, wy = ws.y * h;
+        var wdx = wx - w/2, wdy = wy - h/2;
+        var wdist = Math.sqrt(wdx*wdx + wdy*wdy) || 1;
+        var wlen = wf * wdist * 0.12;
+        if(wlen < 2) continue;
+        var wtx = wx - wdx/wdist*wlen, wty = wy - wdy/wdist*wlen;
+        var wg = ctx.createLinearGradient(wtx, wty, wx, wy);
+        wg.addColorStop(0, 'rgba(180,200,255,0)');
+        wg.addColorStop(1, 'rgba(200,220,255,' + (wf * 0.45).toFixed(3) + ')');
+        ctx.strokeStyle = wg;
+        ctx.beginPath();
+        ctx.moveTo(wtx, wty);
+        ctx.lineTo(wx, wy);
+        ctx.stroke();
+      }
+    }
     /* Spawn shooting stars every 8-12 seconds */
     if(t - lastShootTime > 8 + Math.random() * 4){
       spawnShooter();
