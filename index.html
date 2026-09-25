@@ -715,6 +715,8 @@
     transform: translateY(0);
   }
   .timeline-item { transition-delay: calc(var(--i, 0) * 0.12s); }
+  .mission-statement.fade-in { transition-delay: 0.15s; }
+  .mission-note.fade-in + .mission-note.fade-in { transition-delay: 0.18s; }
   /* RESPONSIVE */
   @media (max-width: 900px) {
     nav { padding: 1.25rem 2rem; }
@@ -1058,11 +1060,11 @@
     });
   }
   /* SCROLL FADE-IN */
-  var fadeEls = document.querySelectorAll(".mission-inner, .mission-detail-inner, .thesis .section-label, .thesis .section-title, .thesis .section-text, .pillar, .portfolio .section-label, .portfolio .section-title, .portfolio .section-text, .portfolio-card, .metric-item, .conviction .section-label, .conviction .section-title, .conviction .section-text, .timeline-item, .founder-image, .founder-content, .contact-inner, .contact-path");
+  var fadeEls = document.querySelectorAll(".mission-label, .mission-statement, .mission-note, .thesis .section-label, .thesis .section-title, .thesis .section-text, .pillar, .portfolio .section-label, .portfolio .section-title, .portfolio .section-text, .portfolio-card, .metric-item, .conviction .section-label, .conviction .section-title, .conviction .section-text, .timeline-item, .founder-image, .founder-content, .contact-inner, .contact-path");
   var timelineIdx = 0;
   fadeEls.forEach(function(el){
     el.classList.add("fade-in");
-    if(el.classList.contains("portfolio-card") || el.classList.contains("contact-path")){
+    if(el.classList.contains("portfolio-card") || el.classList.contains("contact-path") || el.classList.contains("mission-statement") || el.classList.contains("mission-note")){
       el.classList.add("fade-in-large");
     }
     if(el.classList.contains("timeline-item")){ el.style.setProperty("--i", timelineIdx); timelineIdx++; }
