@@ -208,7 +208,7 @@
   }
   /* MISSION */
   .mission {
-    min-height: 82vh;
+    min-height: 72vh;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1163,15 +1163,16 @@
           labelObserver.disconnect();
         }
       });
-    }, { threshold: 1, rootMargin: '0px 0px -40% 0px' });
+    }, { threshold: 1, rootMargin: '0px 0px -22% 0px' });
     labelObserver.observe(mLabel);
   }
   /* Notes: wait until the first paragraph is fully inside the top 60% of the screen, then run all sentences in sequence */
-  var mNotes = document.querySelectorAll(".mission-note");
+  var mNotes = document.querySelectorAll(".mission-note"), notesFired = false;
   if(mNotes.length){
     var noteObserver = new IntersectionObserver(function(entries){
       entries.forEach(function(entry){
         if(entry.isIntersecting){
+          notesFired = true;
           mNotes.forEach(function(p){ p.classList.add("visible"); });
           noteObserver.disconnect();
           var lines = 0;
@@ -1179,13 +1180,18 @@
           setTimeout(releaseThesis, 150 + lines * 160 + 700);
         }
       });
-    }, { threshold: 1, rootMargin: '0px 0px -40% 0px' });
+    }, { threshold: 1, rootMargin: '0px 0px -22% 0px' });
     noteObserver.observe(mNotes[0]);
   }
   var thesisEl = document.querySelector(".thesis");
   if(thesisEl){
     var thesisFallback = new IntersectionObserver(function(entries){
-      entries.forEach(function(entry){ if(entry.isIntersecting){ releaseThesis(); thesisFallback.disconnect(); } });
+      entries.forEach(function(entry){
+        if(entry.isIntersecting){
+          thesisFallback.disconnect();
+          if(!notesFired) releaseThesis(); /* only if the paragraphs were skipped entirely */
+        }
+      });
     }, { threshold: 0, rootMargin: '0px 0px -55% 0px' });
     thesisFallback.observe(thesisEl);
   }
