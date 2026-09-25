@@ -1257,7 +1257,7 @@
      cruise: base drift, a touch slower in the reading-heavy sections
      scroll: eases up while the visitor scrolls, settles back when they stop
      boost:  the hero arrival burst, easing out over ~3s                   */
-  var CRUISE = 0.32, CRUISE_READING = 0.24, SCROLL_LIFT = 0.30;
+  var CRUISE = 0.20, CRUISE_READING = 0.15, SCROLL_LIFT = 0.18;
   var warp = CRUISE, warpStart = null;
   var lastScrollY = window.scrollY, scrollVel = 0, lastScrollT = performance.now();
   window.addEventListener('scroll', function(){
