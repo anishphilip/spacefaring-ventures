@@ -208,7 +208,7 @@
   }
   /* MISSION */
   .mission {
-    min-height: 100vh;
+    min-height: 82vh;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -715,8 +715,37 @@
     transform: translateY(0);
   }
   .timeline-item { transition-delay: calc(var(--i, 0) * 0.12s); }
-  .mission-statement.fade-in { transition-delay: 0.15s; }
-  .mission-note.fade-in + .mission-note.fade-in { transition-delay: 0.18s; }
+  .mission-label.fade-in, .mission-statement.fade-in, .mission-note.fade-in {
+    transform: translateY(48px);
+    transition: opacity 1.2s ease, transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  /* MISSION STATEMENT: word-by-word reveal */
+  .mission-statement.fade-in { transform: none; transition: opacity 0.3s ease; transition-delay: 0.2s; }
+  .mission-statement .w {
+    display: inline-block;
+    opacity: 0;
+    transform: translateY(0.45em);
+    filter: blur(4px);
+    transition: opacity 0.7s ease, transform 0.9s cubic-bezier(0.16, 1, 0.3, 1), filter 0.7s ease;
+    transition-delay: calc(0.25s + var(--w, 0) * 0.045s);
+  }
+  .mission-statement.visible .w { opacity: 1; transform: translateY(0); filter: blur(0); }
+  /* MISSION NOTES: sentence-by-sentence reveal */
+  .mission-note.fade-in { transform: none; transition: opacity 0.3s ease; }
+  .mission-note .s {
+    display: inline;
+    opacity: 0;
+    transition: opacity 0.9s ease;
+    transition-delay: calc(0.15s + var(--s, 0) * 0.28s);
+  }
+  .mission-note.visible .s { opacity: 1; }
+  @media (prefers-reduced-motion: reduce) {
+    .mission-statement .w { opacity: 1; transform: none; filter: none; transition: none; }
+    .mission-note .s { opacity: 1; transition: none; }
+  }
+  .mission-label.fade-in.visible, .mission-statement.fade-in.visible, .mission-note.fade-in.visible {
+    transform: translateY(0) scale(1);
+  }
   /* RESPONSIVE */
   @media (max-width: 900px) {
     nav { padding: 1.25rem 2rem; }
@@ -1078,6 +1107,36 @@
     });
   }, { threshold: 0.08, rootMargin: '0px 0px -15% 0px' });
   fadeEls.forEach(function(el){ fadeObserver.observe(el); });
+  /* MISSION STATEMENT: split into words for the word-by-word reveal */
+  var msEl = document.querySelector(".mission-statement");
+  if(msEl && !msEl.dataset.split){
+    var words = msEl.textContent.trim().split(/\s+/);
+    msEl.innerHTML = words.map(function(w, i){
+      return '<span class="w" style="--w:' + i + '">' + w + '</span>';
+    }).join(' ');
+    msEl.dataset.split = "1";
+  }
+  /* MISSION NOTES: split into sentences; the count continues across both paragraphs */
+  var sIdx = 0;
+  document.querySelectorAll(".mission-note").forEach(function(p){
+    if(p.dataset.split) return;
+    var sentences = p.textContent.trim().match(/[^.!?]+[.!?]+["']?|[^.!?]+$/g) || [p.textContent.trim()];
+    p.innerHTML = sentences.map(function(t){
+      return '<span class="s" style="--s:' + (sIdx++) + '">' + t.trim() + '</span>';
+    }).join(' ');
+    p.dataset.split = "1";
+  });
+  /* MISSION: fire later (once well into the viewport) so the rise is actually seen */
+  var missionEls = document.querySelectorAll(".mission-label, .mission-statement, .mission-note");
+  var missionObserver = new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      if(entry.isIntersecting){
+        entry.target.classList.add("visible");
+        missionObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.4, rootMargin: '0px 0px -28% 0px' });
+  missionEls.forEach(function(el){ fadeObserver.unobserve(el); missionObserver.observe(el); });
   /* FIX: Force fade-in visible when clicking nav anchors */
   links.forEach(function(a){
     a.addEventListener("click", function(){
