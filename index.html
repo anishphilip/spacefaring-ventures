@@ -1,7 +1,3 @@
-
-
-
-
 <!--
   Copyright (c) 2026 Spacefaring Ventures LLC. All rights reserved.
   This source code is the proprietary and confidential property of Spacefaring Ventures LLC.
@@ -1180,258 +1176,78 @@
   else document.addEventListener('sv-anim-go', armHeroCounters);
 })();
 </script>
-<!-- ANIMATED STARFIELD -->
+<!-- ANIMATED STARFIELD (moving through space) -->
 <script>
 (function(){
   var canvas = document.getElementById('starfield');
   if(!canvas) return;
   var ctx = canvas.getContext('2d');
   var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var warpStart = null;
   var dpr = Math.min(window.devicePixelRatio || 1, 2);
-  /* --- MOUSE PARALLAX --- */
-  var mouseX = 0.5, mouseY = 0.5;
-  var smoothX = 0.5, smoothY = 0.5;
+  var W = 0, H = 0;
+  function resize(){
+    W = window.innerWidth; H = window.innerHeight;
+    canvas.width = W * dpr; canvas.height = H * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  /* mouse parallax on the vanishing point */
+  var mouseX = 0.5, mouseY = 0.5, smoothX = 0.5, smoothY = 0.5;
   document.addEventListener('mousemove', function(e){
     mouseX = e.clientX / window.innerWidth;
     mouseY = e.clientY / window.innerHeight;
   });
 
-  /* --- NEBULA COLOR WASH (offscreen canvas) --- */
-  var nebulaCanvas = document.createElement('canvas');
-  var nebulaCtx = nebulaCanvas.getContext('2d');
-  function buildNebula(){
-    var w = window.innerWidth, h = window.innerHeight;
-    nebulaCanvas.width = w;
-    nebulaCanvas.height = h;
-    nebulaCtx.clearRect(0, 0, w, h);
-    var blobs = [
-      {x: 0.2, y: 0.15, radius: 0.35, r: 30, g: 20, b: 80, a: 0.035},
-      {x: 0.75, y: 0.3, radius: 0.3, r: 15, g: 40, b: 90, a: 0.03},
-      {x: 0.5, y: 0.7, radius: 0.4, r: 20, g: 15, b: 60, a: 0.025},
-      {x: 0.85, y: 0.8, radius: 0.25, r: 40, g: 20, b: 70, a: 0.03},
-      {x: 0.1, y: 0.6, radius: 0.28, r: 10, g: 30, b: 65, a: 0.025}
-    ];
-    for(var i = 0; i < blobs.length; i++){
-      var bl = blobs[i];
-      var cx = bl.x * w, cy = bl.y * h;
-      var rad = bl.radius * Math.max(w, h);
-      var ng = nebulaCtx.createRadialGradient(cx, cy, 0, cx, cy, rad);
-      ng.addColorStop(0, 'rgba(' + bl.r + ',' + bl.g + ',' + bl.b + ',' + bl.a + ')');
-      ng.addColorStop(0.5, 'rgba(' + bl.r + ',' + bl.g + ',' + bl.b + ',' + (bl.a * 0.4) + ')');
-      ng.addColorStop(1, 'rgba(0,0,0,0)');
-      nebulaCtx.fillStyle = ng;
-      nebulaCtx.fillRect(0, 0, w, h);
-    }
-  }
-
-  function resize(){
-    canvas.width = window.innerWidth * dpr;
-    canvas.height = window.innerHeight * dpr;
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    buildNebula();
-  }
-  resize();
-  window.addEventListener('resize', resize);
-
-  /* --- DEPTH LAYERS: 0=far, 1=mid, 2=near --- */
-  var layerConfig = [
-    {driftMult: 0.5, parallax: 4, sizeMult: 0.7},
-    {driftMult: 1.0, parallax: 10, sizeMult: 1.0},
-    {driftMult: 1.8, parallax: 20, sizeMult: 1.3}
-  ];
-
-  /* --- BUILD STARS WITH DEPTH --- */
-  var STARS = 400;
-  var stars = [];
+  function rnd(a, b){ return a + Math.random() * (b - a); }
+  var STARS = 700, stars = [];
   for(var i = 0; i < STARS; i++){
-    var sizeRoll = Math.random();
-    var size;
-    if(sizeRoll < 0.65) size = 0.3 + Math.random() * 0.4;
-    else if(sizeRoll < 0.88) size = 0.6 + Math.random() * 0.5;
-    else if(sizeRoll < 0.97) size = 1.0 + Math.random() * 0.5;
-    else size = 1.3 + Math.random() * 0.7;
-    var cRoll = Math.random();
-    var r, g, b;
-    if(cRoll < 0.5){ r=230; g=235; b=255; }
-    else if(cRoll < 0.7){ r=190; g=210; b=255; }
-    else if(cRoll < 0.85){ r=170; g=220; b=255; }
-    else if(cRoll < 0.93){ r=200; g=185; b=255; }
-    else{ r=255; g=225; b=190; }
-    var layerRoll = Math.random();
-    var layer = layerRoll < 0.45 ? 0 : (layerRoll < 0.8 ? 1 : 2);
-    var lc = layerConfig[layer];
-    stars.push({
-      x: Math.random(), y: Math.random(),
-      size: size * lc.sizeMult, r: r, g: g, b: b,
-      phase: Math.random() * Math.PI * 2,
-      speed: 0.3 + Math.random() * 1.0,
-      driftX: (Math.random() - 0.5) * 0.000018 * lc.driftMult,
-      driftY: (Math.random() - 0.5) * 0.000018 * lc.driftMult,
-      glowMult: 4 + Math.random() * 6,
-      layer: layer,
-      parallax: lc.parallax,
-      feature: false
-    });
+    stars.push({ x: rnd(-1,1), y: rnd(-1,1), z: rnd(0.05,1), b: rnd(0.3,1), c: Math.random() < 0.1 });
   }
 
+  var BASE_WARP = 0.45;      /* cruising speed through space */
+  var warpStart = null;      /* boosts during the headline arrival */
+  var last = performance.now();
 
-  /* --- SHOOTING STARS --- */
-  var shooters = [];
-  var lastShootTime = 0;
-  function spawnShooter(){
-    var startX = Math.random() * 0.7 + 0.1;
-    var startY = Math.random() * 0.3;
-    var angle = Math.PI * 0.12 + Math.random() * Math.PI * 0.25;
-    var spd = 0.35 + Math.random() * 0.35;
-    var len = 80 + Math.random() * 140;
-    shooters.push({
-      x: startX, y: startY, angle: angle, speed: spd,
-      len: len, life: 0, maxLife: 1.0 + Math.random() * 0.6,
-      r: 200 + Math.floor(Math.random()*55),
-      g: 220 + Math.floor(Math.random()*35),
-      b: 255
-    });
-  }
-
-  function animate(time){
+  function animate(now){
     requestAnimationFrame(animate);
-    var t = time * 0.001;
-    var w = window.innerWidth, h = window.innerHeight;
-    ctx.clearRect(0, 0, w, h);
+    var dt = Math.min(0.05, (now - last) / 1000); last = now;
+    var t = now * 0.001;
+    if(reducedMotion){ dt = 0; }
 
-    /* Smooth mouse interpolation */
-    smoothX += (mouseX - smoothX) * 0.04;
-    smoothY += (mouseY - smoothY) * 0.04;
-    var offsetBaseX = (smoothX - 0.5);
-    var offsetBaseY = (smoothY - 0.5);
-
-    /* Draw nebula wash */
-    var nebulaShiftX = offsetBaseX * -8;
-    var nebulaShiftY = offsetBaseY * -8;
-    var nebulaPulse = 0.7 + 0.3 * Math.sin(t * 0.08);
-    ctx.globalAlpha = nebulaPulse;
-    ctx.drawImage(nebulaCanvas, nebulaShiftX, nebulaShiftY, w, h);
-    ctx.globalAlpha = 1.0;
-
-    /* Draw stars with depth + parallax */
-    for(var i = 0; i < stars.length; i++){
-      var s = stars[i];
-      s.x += s.driftX;
-      s.y += s.driftY;
-      if(s.x < -0.05) s.x = 1.05;
-      if(s.x > 1.05) s.x = -0.05;
-      if(s.y < -0.05) s.y = 1.05;
-      if(s.y > 1.05) s.y = -0.05;
-      var twinkle = 0.4 + 0.6 * (0.5 + 0.5 * Math.sin(t * s.speed + s.phase));
-      var glowPulse = 0.5 + 0.5 * Math.sin(t * s.speed * 0.6 + s.phase * 1.5);
-      var px = s.x * w + offsetBaseX * s.parallax;
-      var py = s.y * h + offsetBaseY * s.parallax;
-      var glowRadius = s.size * s.glowMult;
-
-      /* Feature stars get enhanced glow */
-      if(s.feature){
-        var fGlowAlpha = twinkle * 0.14 * glowPulse;
-        if(fGlowAlpha > 0.005){
-          var fGrad = ctx.createRadialGradient(px, py, 0, px, py, glowRadius);
-          fGrad.addColorStop(0, 'rgba(' + s.r + ',' + s.g + ',' + s.b + ',' + fGlowAlpha + ')');
-          fGrad.addColorStop(0.25, 'rgba(' + s.r + ',' + s.g + ',' + s.b + ',' + (fGlowAlpha * 0.6) + ')');
-          fGrad.addColorStop(0.6, 'rgba(' + s.r + ',' + s.g + ',' + s.b + ',' + (fGlowAlpha * 0.2) + ')');
-          fGrad.addColorStop(1, 'rgba(0,0,0,0)');
-          ctx.fillStyle = fGrad;
-          ctx.fillRect(px - glowRadius, py - glowRadius, glowRadius * 2, glowRadius * 2);
-        }
-        /* Inner bright core for feature stars */
-        ctx.beginPath();
-        ctx.arc(px, py, s.size * 0.4, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(255,255,255,' + (twinkle * 0.45).toFixed(3) + ')';
-        ctx.fill();
-      } else {
-        var glowAlpha = twinkle * 0.12 * glowPulse;
-        if(glowAlpha > 0.01){
-          var grad = ctx.createRadialGradient(px, py, 0, px, py, glowRadius);
-          grad.addColorStop(0, 'rgba(' + s.r + ',' + s.g + ',' + s.b + ',' + glowAlpha + ')');
-          grad.addColorStop(0.4, 'rgba(' + s.r + ',' + s.g + ',' + s.b + ',' + (glowAlpha * 0.4) + ')');
-          grad.addColorStop(1, 'rgba(0,0,0,0)');
-          ctx.fillStyle = grad;
-          ctx.fillRect(px - glowRadius, py - glowRadius, glowRadius * 2, glowRadius * 2);
-        }
-      }
-      ctx.beginPath();
-      ctx.arc(px, py, s.size, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(' + s.r + ',' + s.g + ',' + s.b + ',' + (twinkle * 0.9) + ')';
-      ctx.fill();
-    }
-
-    /* WARP INTRO - stars streak radially during the headline arrival (added 2026-06-12) */
     if(warpStart === null && document.documentElement.classList.contains('anim-go')) warpStart = t;
     var wt = warpStart === null ? 99 : t - warpStart;
-    if(wt < 1.6 && !reducedMotion){
-      var wf = Math.pow(1 - wt / 1.6, 2);
-      ctx.lineWidth = 1;
-      for(var wi = 0; wi < stars.length; wi += 3){
-        var ws = stars[wi];
-        var wx = ws.x * w, wy = ws.y * h;
-        var wdx = wx - w/2, wdy = wy - h/2;
-        var wdist = Math.sqrt(wdx*wdx + wdy*wdy) || 1;
-        var wlen = wf * wdist * 0.12;
-        if(wlen < 2) continue;
-        var wtx = wx - wdx/wdist*wlen, wty = wy - wdy/wdist*wlen;
-        var wg = ctx.createLinearGradient(wtx, wty, wx, wy);
-        wg.addColorStop(0, 'rgba(180,200,255,0)');
-        wg.addColorStop(1, 'rgba(200,220,255,' + (wf * 0.45).toFixed(3) + ')');
-        ctx.strokeStyle = wg;
-        ctx.beginPath();
-        ctx.moveTo(wtx, wty);
-        ctx.lineTo(wx, wy);
-        ctx.stroke();
+    var boost = (wt < 1.8 && !reducedMotion) ? Math.pow(1 - wt / 1.8, 2) * 3.2 : 0;
+    var warp = BASE_WARP + boost;
+
+    smoothX += (mouseX - smoothX) * 0.04;
+    smoothY += (mouseY - smoothY) * 0.04;
+    var cx = W / 2 + (smoothX - 0.5) * 40;
+    var cy = H * 0.45 + (smoothY - 0.5) * 30;
+    var f = Math.min(W, H) * 0.9;
+
+    ctx.clearRect(0, 0, W, H);
+    for(var i = 0; i < stars.length; i++){
+      var s = stars[i];
+      s.z -= warp * dt * 0.55;
+      if(s.z <= 0.02){ s.x = rnd(-1,1); s.y = rnd(-1,1); s.z = 1; }
+      var pz = f / (s.z + 1e-4);
+      var sx = cx + s.x * pz * 0.35, sy = cy + s.y * pz * 0.35;
+      if(sx < -40 || sx > W + 40 || sy < -40 || sy > H + 40){ s.z = 1; continue; }
+      var size = (1 - s.z) * 2 + 0.3;
+      var a = Math.min(1, (1 - s.z) * 1.4) * s.b;
+      var streak = Math.min(220, warp * warp * 30 * (1 - s.z));
+      var col = s.c ? '124,192,255' : '240,240,240';
+      if(streak > 2){
+        var dx = sx - cx, dy = sy - cy, L = Math.hypot(dx, dy) || 1;
+        ctx.strokeStyle = 'rgba(' + col + ',' + (a * 0.9).toFixed(3) + ')';
+        ctx.lineWidth = size * 0.9;
+        ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(sx - dx / L * streak, sy - dy / L * streak); ctx.stroke();
+      } else {
+        ctx.fillStyle = 'rgba(' + col + ',' + a.toFixed(3) + ')';
+        ctx.beginPath(); ctx.arc(sx, sy, size, 0, Math.PI * 2); ctx.fill();
       }
-    }
-    /* Spawn shooting stars every 8-12 seconds */
-    if(t - lastShootTime > 8 + Math.random() * 4){
-      spawnShooter();
-      lastShootTime = t;
-    }
-
-    /* Draw shooting stars */
-    for(var j = shooters.length - 1; j >= 0; j--){
-      var sh = shooters[j];
-      sh.life += 0.016;
-      if(sh.life > sh.maxLife){ shooters.splice(j, 1); continue; }
-
-      var progress = sh.life / sh.maxLife;
-      var fade = progress < 0.15 ? progress / 0.15 : (1.0 - progress) / 0.85;
-      fade = Math.max(0, Math.min(1, fade));
-
-      var headX = (sh.x + Math.cos(sh.angle) * sh.speed * sh.life) * w;
-      var headY = (sh.y + Math.sin(sh.angle) * sh.speed * sh.life) * h;
-      var tailX = headX - Math.cos(sh.angle) * sh.len * fade;
-      var tailY = headY - Math.sin(sh.angle) * sh.len * fade;
-
-      /* Gradient trail */
-      var sg = ctx.createLinearGradient(tailX, tailY, headX, headY);
-      sg.addColorStop(0, 'rgba(' + sh.r + ',' + sh.g + ',' + sh.b + ',0)');
-      sg.addColorStop(0.6, 'rgba(' + sh.r + ',' + sh.g + ',' + sh.b + ',' + (fade * 0.35).toFixed(3) + ')');
-      sg.addColorStop(1, 'rgba(255,255,255,' + (fade * 0.9).toFixed(3) + ')');
-      ctx.strokeStyle = sg;
-      ctx.lineWidth = 1.5;
-      ctx.beginPath();
-      ctx.moveTo(tailX, tailY);
-      ctx.lineTo(headX, headY);
-      ctx.stroke();
-
-      /* Bright head dot */
-      ctx.beginPath();
-      ctx.arc(headX, headY, 1.8, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(255,255,255,' + (fade * 0.85).toFixed(3) + ')';
-      ctx.fill();
-
-      /* Soft glow around head */
-      var hGrad = ctx.createRadialGradient(headX, headY, 0, headX, headY, 6);
-      hGrad.addColorStop(0, 'rgba(255,255,255,' + (fade * 0.3).toFixed(3) + ')');
-      hGrad.addColorStop(1, 'rgba(255,255,255,0)');
-      ctx.fillStyle = hGrad;
-      ctx.fillRect(headX - 6, headY - 6, 12, 12);
     }
   }
   requestAnimationFrame(animate);
