@@ -726,22 +726,23 @@
     opacity: 0;
     transform: translateY(0.45em);
     filter: blur(4px);
-    transition: opacity 0.7s ease, transform 0.9s cubic-bezier(0.16, 1, 0.3, 1), filter 0.7s ease;
-    transition-delay: calc(0.25s + var(--w, 0) * 0.045s);
+    transition: opacity 1.0s ease, transform 1.2s cubic-bezier(0.16, 1, 0.3, 1), filter 1.0s ease;
+    transition-delay: calc(0.3s + var(--w, 0) * 0.08s);
   }
   .mission-statement.visible .w { opacity: 1; transform: translateY(0); filter: blur(0); }
-  /* MISSION NOTES: sentence-by-sentence reveal */
+  /* MISSION NOTES: line-by-line reveal (lines measured after layout) */
   .mission-note.fade-in { transform: none; transition: opacity 0.3s ease; }
-  .mission-note .s {
-    display: inline;
+  .mission-note .w {
+    display: inline-block;
     opacity: 0;
-    transition: opacity 0.9s ease;
-    transition-delay: calc(0.15s + var(--s, 0) * 0.28s);
+    transform: translateY(0.3em);
+    transition: opacity 0.8s ease, transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+    transition-delay: calc(0.15s + var(--l, 0) * 0.16s);
   }
-  .mission-note.visible .s { opacity: 1; }
+  .mission-note.visible .w { opacity: 1; transform: translateY(0); }
   @media (prefers-reduced-motion: reduce) {
     .mission-statement .w { opacity: 1; transform: none; filter: none; transition: none; }
-    .mission-note .s { opacity: 1; transition: none; }
+    .mission-note .w { opacity: 1; transform: none; transition: none; }
   }
   .mission-label.fade-in.visible, .mission-statement.fade-in.visible, .mission-note.fade-in.visible {
     transform: translateY(0) scale(1);
@@ -804,8 +805,11 @@
     .hero { padding: 7rem 1.5rem 3rem; }
     section, .portfolio, .conviction, .contact, .founder { padding: 3rem 1.5rem; }
     .metrics-grid { grid-template-columns: 1fr 1fr; }
-    .mission { padding: 3rem 1.5rem; }
+    .mission { padding: 3rem 1.5rem; min-height: 70vh; }
     .mission-detail { padding: 3rem 1.5rem; }
+    .mission-statement { font-size: clamp(1.6rem, 7.5vw, 2.2rem); line-height: 1.3; }
+    .mission-statement .w { transition-delay: calc(0.25s + var(--w, 0) * 0.06s); }
+    .mission-note { font-size: 1.05rem; margin-top: 2rem; }
   }
 </style>
 <script>
@@ -1106,7 +1110,15 @@
       }
     });
   }, { threshold: 0.08, rootMargin: '0px 0px -15% 0px' });
-  fadeEls.forEach(function(el){ fadeObserver.observe(el); });
+  /* Thesis waits for the mission paragraphs to finish (released below) */
+  var thesisGated = [], thesisReleased = false;
+  fadeEls.forEach(function(el){
+    if(el.closest && el.closest(".thesis")) thesisGated.push(el); else fadeObserver.observe(el);
+  });
+  function releaseThesis(){
+    if(thesisReleased) return; thesisReleased = true;
+    thesisGated.forEach(function(el){ fadeObserver.observe(el); });
+  }
   /* MISSION STATEMENT: split into words for the word-by-word reveal */
   var msEl = document.querySelector(".mission-statement");
   if(msEl && !msEl.dataset.split){
@@ -1116,27 +1128,67 @@
     }).join(' ');
     msEl.dataset.split = "1";
   }
-  /* MISSION NOTES: split into sentences; the count continues across both paragraphs */
-  var sIdx = 0;
-  document.querySelectorAll(".mission-note").forEach(function(p){
+  /* MISSION NOTES: split into words, then number each rendered line; the count continues across both paragraphs */
+  var noteEls = document.querySelectorAll(".mission-note");
+  noteEls.forEach(function(p){
     if(p.dataset.split) return;
-    var sentences = p.textContent.trim().match(/[^.!?]+[.!?]+["']?|[^.!?]+$/g) || [p.textContent.trim()];
-    p.innerHTML = sentences.map(function(t){
-      return '<span class="s" style="--s:' + (sIdx++) + '">' + t.trim() + '</span>';
-    }).join(' ');
+    p.innerHTML = p.textContent.trim().split(/\s+/).map(function(w){ return '<span class="w">' + w + '</span>'; }).join(' ');
     p.dataset.split = "1";
   });
+  function numberLines(){
+    var line = -1, lastTop = null;
+    noteEls.forEach(function(p){
+      p.querySelectorAll(".w").forEach(function(w){
+        var top = w.offsetTop;
+        if(top !== lastTop){ line++; lastTop = top; }
+        w.style.setProperty("--l", line);
+      });
+      lastTop = null; /* new paragraph always starts a new line */
+    });
+  }
+  numberLines();
+  if(document.fonts && document.fonts.ready){ document.fonts.ready.then(numberLines); }
+  var nlT; window.addEventListener("resize", function(){ clearTimeout(nlT); nlT = setTimeout(numberLines, 120); });
   /* MISSION: fire later (once well into the viewport) so the rise is actually seen */
   var missionEls = document.querySelectorAll(".mission-label, .mission-statement, .mission-note");
-  var missionObserver = new IntersectionObserver(function(entries){
-    entries.forEach(function(entry){
-      if(entry.isIntersecting){
-        entry.target.classList.add("visible");
-        missionObserver.unobserve(entry.target);
-      }
-    });
-  }, { threshold: 0.4, rootMargin: '0px 0px -28% 0px' });
-  missionEls.forEach(function(el){ fadeObserver.unobserve(el); missionObserver.observe(el); });
+  missionEls.forEach(function(el){ fadeObserver.unobserve(el); });
+  /* Label + statement: wait until "Our Mission" is fully inside the top 60% of the screen, then reveal both */
+  var mLabel = document.querySelector(".mission-label"), mStatement = document.querySelector(".mission-statement");
+  if(mLabel){
+    var labelObserver = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if(entry.isIntersecting){
+          mLabel.classList.add("visible");
+          if(mStatement) mStatement.classList.add("visible");
+          labelObserver.disconnect();
+        }
+      });
+    }, { threshold: 1, rootMargin: '0px 0px -40% 0px' });
+    labelObserver.observe(mLabel);
+  }
+  /* Notes: wait until the first paragraph is fully inside the top 60% of the screen, then run all sentences in sequence */
+  var mNotes = document.querySelectorAll(".mission-note");
+  if(mNotes.length){
+    var noteObserver = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if(entry.isIntersecting){
+          mNotes.forEach(function(p){ p.classList.add("visible"); });
+          noteObserver.disconnect();
+          var lines = 0;
+          mNotes.forEach(function(p){ p.querySelectorAll(".w").forEach(function(w){ lines = Math.max(lines, parseInt(w.style.getPropertyValue("--l")) || 0); }); });
+          setTimeout(releaseThesis, 150 + lines * 160 + 700);
+        }
+      });
+    }, { threshold: 1, rootMargin: '0px 0px -40% 0px' });
+    noteObserver.observe(mNotes[0]);
+  }
+  var thesisEl = document.querySelector(".thesis");
+  if(thesisEl){
+    var thesisFallback = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){ if(entry.isIntersecting){ releaseThesis(); thesisFallback.disconnect(); } });
+    }, { threshold: 0, rootMargin: '0px 0px -55% 0px' });
+    thesisFallback.observe(thesisEl);
+  }
   /* FIX: Force fade-in visible when clicking nav anchors */
   links.forEach(function(a){
     a.addEventListener("click", function(){
@@ -1266,7 +1318,9 @@
   if(!canvas) return;
   var ctx = canvas.getContext('2d');
   var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var dpr = Math.min(window.devicePixelRatio || 1, 2);
+  var isSmall = Math.min(window.innerWidth, window.innerHeight) < 720;
+  var isTouch = window.matchMedia('(pointer: coarse)').matches;
+  var dpr = Math.min(window.devicePixelRatio || 1, isSmall ? 1.5 : 2);
   var W = 0, H = 0;
   function resize(){
     W = window.innerWidth; H = window.innerHeight;
@@ -1274,17 +1328,23 @@
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
   resize();
-  window.addEventListener('resize', resize);
+  var lastW = window.innerWidth;
+  window.addEventListener('resize', function(){
+    if(isTouch && window.innerWidth === lastW && Math.abs(window.innerHeight - H) < 120) return;
+    lastW = window.innerWidth; resize();
+  });
 
   /* mouse parallax on the vanishing point */
   var mouseX = 0.5, mouseY = 0.5, smoothX = 0.5, smoothY = 0.5;
-  document.addEventListener('mousemove', function(e){
-    mouseX = e.clientX / window.innerWidth;
-    mouseY = e.clientY / window.innerHeight;
-  });
+  if(!isTouch){
+    document.addEventListener('mousemove', function(e){
+      mouseX = e.clientX / window.innerWidth;
+      mouseY = e.clientY / window.innerHeight;
+    });
+  }
 
   function rnd(a, b){ return a + Math.random() * (b - a); }
-  var STARS = 700, stars = [];
+  var STARS = isSmall ? 360 : 700, stars = [];
   for(var i = 0; i < STARS; i++){
     var sizeRoll = Math.random();
     var sm = sizeRoll < 0.7 ? rnd(0.6, 1.0) : (sizeRoll < 0.94 ? rnd(1.0, 1.5) : rnd(1.5, 2.4));
@@ -1318,7 +1378,7 @@
      cruise: base drift, a touch slower in the reading-heavy sections
      scroll: eases up while the visitor scrolls, settles back when they stop
      boost:  the hero arrival burst, easing out over ~3s                   */
-  var CRUISE = 0.20, CRUISE_READING = 0.15, SCROLL_LIFT = 0.18;
+  var CRUISE = 0.20, CRUISE_READING = 0.15, SCROLL_LIFT = isTouch ? 0.08 : 0.18;
   var warp = CRUISE, warpStart = null;
   var lastScrollY = window.scrollY, scrollVel = 0, lastScrollT = performance.now();
   window.addEventListener('scroll', function(){
