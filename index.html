@@ -208,6 +208,10 @@
   }
   /* MISSION */
   .mission {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     padding: 6rem 4rem;
     border-top: 1px solid var(--border);
     border-bottom: 1px solid var(--border);
@@ -229,19 +233,30 @@
   }
   .mission-statement {
     font-family: var(--font-body);
-    font-size: clamp(1.3rem, 2.5vw, 1.7rem);
+    font-size: clamp(1.9rem, 4.2vw, 3.4rem);
     font-weight: 300;
-    line-height: 1.7;
+    line-height: 1.35;
     color: var(--text-primary);
     letter-spacing: 0.01em;
   }
+  .mission-detail {
+    padding: 6rem 4rem;
+    border-bottom: 1px solid var(--border);
+    background: transparent;
+    text-align: center;
+  }
+  .mission-detail-inner {
+    max-width: 850px;
+    margin: 0 auto;
+  }
+  .mission-detail .mission-note:first-child { margin-top: 0; }
   .mission-note {
     font-family: var(--font-body);
-    font-size: 0.95rem;
+    font-size: clamp(1.15rem, 1.7vw, 1.4rem);
     font-weight: 300;
     color: var(--text-secondary);
     margin-top: 2.5rem;
-    max-width: 700px;
+    max-width: 850px;
     margin-left: auto;
     margin-right: auto;
     line-height: 1.8;
@@ -711,6 +726,7 @@
     .founder-inner { grid-template-columns: 1fr; }
     .founder-image { max-width: 320px; }
     .mission { padding: 4rem 2rem; }
+    .mission-detail { padding: 4rem 2rem; }
     footer { flex-direction: column; gap: 1rem; text-align: center; }
   }
   /* HAMBURGER MENU */
@@ -758,6 +774,7 @@
     section, .portfolio, .conviction, .contact, .founder { padding: 3rem 1.5rem; }
     .metrics-grid { grid-template-columns: 1fr 1fr; }
     .mission { padding: 3rem 1.5rem; }
+    .mission-detail { padding: 3rem 1.5rem; }
   }
 </style>
 <script>
@@ -810,6 +827,11 @@
   <div class="mission-inner">
     <p class="mission-label">Our Mission</p>
     <p class="mission-statement">Solve humanity's most important problems and accelerate the advent of an exciting future by investing in the world's best technology companies.</p>
+  </div>
+</div>
+<!-- MISSION DETAIL -->
+<div class="mission-detail">
+  <div class="mission-detail-inner">
     <p class="mission-note">The name "Spacefaring" reflects our deepest conviction: that humanity's future lies beyond the boundaries of what is known today. For us, spacefaring is not merely about traveling beyond Earth, but about pursuing ventures as vast, open-ended, and limitless as space itself.</p>
     <p class="mission-note">It represents the drive to push past every boundary, expand the frontiers of what is possible, and back the companies building technologies that will carry civilization forward - in space, intelligence, autonomy, robotics, energy, and other foundational technologies of the future.</p>
   </div>
@@ -1036,7 +1058,7 @@
     });
   }
   /* SCROLL FADE-IN */
-  var fadeEls = document.querySelectorAll(".mission-inner, .thesis .section-label, .thesis .section-title, .thesis .section-text, .pillar, .portfolio .section-label, .portfolio .section-title, .portfolio .section-text, .portfolio-card, .metric-item, .conviction .section-label, .conviction .section-title, .conviction .section-text, .timeline-item, .founder-image, .founder-content, .contact-inner, .contact-path");
+  var fadeEls = document.querySelectorAll(".mission-inner, .mission-detail-inner, .thesis .section-label, .thesis .section-title, .thesis .section-text, .pillar, .portfolio .section-label, .portfolio .section-title, .portfolio .section-text, .portfolio-card, .metric-item, .conviction .section-label, .conviction .section-title, .conviction .section-text, .timeline-item, .founder-image, .founder-content, .contact-inner, .contact-path");
   var timelineIdx = 0;
   fadeEls.forEach(function(el){
     el.classList.add("fade-in");
@@ -1206,7 +1228,25 @@
     stars.push({ x: rnd(-1,1), y: rnd(-1,1), z: rnd(0.05,1), b: rnd(0.3,1), c: Math.random() < 0.1 });
   }
 
-  var BASE_WARP = 0.45;      /* cruising speed through space */
+  /* --- SHOOTING STARS --- */
+  var shooters = [];
+  var lastShootTime = 0;
+  function spawnShooter(){
+    var startX = Math.random() * 0.7 + 0.1;
+    var startY = Math.random() * 0.3;
+    var angle = Math.PI * 0.12 + Math.random() * Math.PI * 0.25;
+    var spd = 0.35 + Math.random() * 0.35;
+    var len = 80 + Math.random() * 140;
+    shooters.push({
+      x: startX, y: startY, angle: angle, speed: spd,
+      len: len, life: 0, maxLife: 1.0 + Math.random() * 0.6,
+      r: 200 + Math.floor(Math.random()*55),
+      g: 220 + Math.floor(Math.random()*35),
+      b: 255
+    });
+  }
+
+  var BASE_WARP = 0.32;      /* cruising speed through space */
   var warpStart = null;      /* boosts during the headline arrival */
   var last = performance.now();
 
@@ -1248,6 +1288,41 @@
         ctx.fillStyle = 'rgba(' + col + ',' + a.toFixed(3) + ')';
         ctx.beginPath(); ctx.arc(sx, sy, size, 0, Math.PI * 2); ctx.fill();
       }
+    }
+
+    /* Spawn shooting stars every 8-12 seconds */
+    if(!reducedMotion && t - lastShootTime > 8 + Math.random() * 4){
+      spawnShooter();
+      lastShootTime = t;
+    }
+
+    /* Draw shooting stars */
+    for(var j = shooters.length - 1; j >= 0; j--){
+      var sh = shooters[j];
+      sh.life += 0.016;
+      if(sh.life > sh.maxLife){ shooters.splice(j, 1); continue; }
+      var progress = sh.life / sh.maxLife;
+      var fade = progress < 0.15 ? progress / 0.15 : (1.0 - progress) / 0.85;
+      fade = Math.max(0, Math.min(1, fade));
+      var headX = (sh.x + Math.cos(sh.angle) * sh.speed * sh.life) * W;
+      var headY = (sh.y + Math.sin(sh.angle) * sh.speed * sh.life) * H;
+      var tailX = headX - Math.cos(sh.angle) * sh.len * fade;
+      var tailY = headY - Math.sin(sh.angle) * sh.len * fade;
+      var sg = ctx.createLinearGradient(tailX, tailY, headX, headY);
+      sg.addColorStop(0, 'rgba(' + sh.r + ',' + sh.g + ',' + sh.b + ',0)');
+      sg.addColorStop(0.6, 'rgba(' + sh.r + ',' + sh.g + ',' + sh.b + ',' + (fade * 0.35).toFixed(3) + ')');
+      sg.addColorStop(1, 'rgba(255,255,255,' + (fade * 0.9).toFixed(3) + ')');
+      ctx.strokeStyle = sg;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(tailX, tailY); ctx.lineTo(headX, headY); ctx.stroke();
+      ctx.beginPath(); ctx.arc(headX, headY, 1.8, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255,255,255,' + (fade * 0.85).toFixed(3) + ')';
+      ctx.fill();
+      var hGrad = ctx.createRadialGradient(headX, headY, 0, headX, headY, 6);
+      hGrad.addColorStop(0, 'rgba(255,255,255,' + (fade * 0.3).toFixed(3) + ')');
+      hGrad.addColorStop(1, 'rgba(255,255,255,0)');
+      ctx.fillStyle = hGrad;
+      ctx.fillRect(headX - 6, headY - 6, 12, 12);
     }
   }
   requestAnimationFrame(animate);
